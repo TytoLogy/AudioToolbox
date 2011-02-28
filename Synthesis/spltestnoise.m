@@ -1,6 +1,13 @@
 function [S, Sdata]  = spltestnoise(duration, Fs, low, high, scale)
-% function [S, Sdata] = spltestnoise(duration,Fs,low,high,scale)
+%--------------------------------------------------------------------------
+% [S, Sdata] = spltestnoise(duration,Fs,low,high,scale)
+%--------------------------------------------------------------------------
+% Audio Toolbox -> synthesis
+%--------------------------------------------------------------------------
 %
+% used to generate noise for calibration of free field speakers (see FFCal)
+%
+%--------------------------------------------------------------------------
 % Input Arguments:
 %	dur		= signal duration (ms)
 %	Fs 		= output sampling rate
@@ -16,17 +23,20 @@ function [S, Sdata]  = spltestnoise(duration, Fs, low, high, scale)
 % 		Sdata.Scale = max(S) * sqrt(floor((high-low)/(Fs/(fftlen-1))));
 % 		Sdata.F = fft_freqs;
 % 
+%--------------------------------------------------------------------------
+% See Also: FFCal
+%--------------------------------------------------------------------------
 
 %--------------------------------------------------------------------------
 % Sharad J. Shanbhag
-% sshanbha@aecom.yu.edu
+% sshanbhag@neoucom.edu
 % 	Code adapted from XDPHYS synth library developed by
 % 	Jamie Mazer and Ben Arthur
 %--------------------------------------------------------------------------
 % Revision History
 %	30 November, 2007 (SJS)
 % 		-program forked off of synnoise_fft
-% 
+%	28 Feb 2011 (SJS): added comments
 %--------------------------------------------------------------------------
 
 

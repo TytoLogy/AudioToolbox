@@ -41,7 +41,7 @@ function [S, Scale, Smag, Sphase]  = syn_headphone_noise(duration, Fs, low, high
 
 %-------------------------------------------------------------------------
 % Sharad J. Shanbhag
-% sharad@etho.caltech.edu
+% sshanbhag@neoucom.edu
 % 	Code adapted from synth library developed by
 % 	Jamie Mazer and Ben Arthur
 %-------------------------------------------------------------------------
@@ -75,6 +75,7 @@ function [S, Scale, Smag, Sphase]  = syn_headphone_noise(duration, Fs, low, high
 %										of frozen or pre-specified noise
 % 									***Note that BC other than 1 will not be 
 % 										"frozen" ******
+%	28 Feb, 2011 (SJS): some comments added
 %-------------------------------------------------------------------------
 % TO DO:
 %	- confirm BC ~= 0 or 1 functionality

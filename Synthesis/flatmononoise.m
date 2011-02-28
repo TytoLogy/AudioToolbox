@@ -1,40 +1,53 @@
 function [S, Scale_out, Smag, Sphase, F]  = flatmononoise(duration, Fs, low, high, scale)
-% function [S, Smag, Sphase, F]  = flatmononoise(duration, Fs, low, high, scale)
+%-----------------------------------------------------------------------------
+%[S, Smag, Sphase, F]  = flatmononoise(duration, Fs, low, high, scale)
+%-----------------------------------------------------------------------------
+% Audio Toolbox -> Synthesis
+%-----------------------------------------------------------------------------
 %
+% generates mono (1 channel) noise signal with flat amplitude spectrum and 
+% constant phase spectrum
+%
+%-----------------------------------------------------------------------------
 % Input Arguments:
-%	dur		= signal duration (ms)
-%	Fs 		= output sampling rate
-%	low 	= low frequency cutoff
-% 	high 	= high frequency cutoff
-%	scale	= rms scale factor. 
+%	dur		signal duration (ms)
+%	Fs 		output sampling rate
+%	low		low frequency cutoff
+% 	high		high frequency cutoff
+%	scale		rms scale factor. 
 %
 % Returned arguments:
-%	S		= [1XN] array 
-
+%	S			[1XN] array of noise
+% 	Smag		magnitude spectrum
+% 	Sphase	phase spectrum
+% 	F			frequencies (Hz) for spectra
+%-----------------------------------------------------------------------------
+% See also: 
+%-----------------------------------------------------------------------------
 
 %--------------------------------------------------------------------------
 % Sharad J. Shanbhag
-% sshanbha@aecom.yu.edu
+% sshanbhag@neoucom.edu
 % 	Code adapted from XDPHYS synth library developed by
 % 	Jamie Mazer and Ben Arthur
 %--------------------------------------------------------------------------
 % Revision History
 %	28 November, 2007 (SJS)
 % 		-program forked off of synnoise_fft
-% 
+%	28 Feb 2011 (SJS):	updated comments/information
 %--------------------------------------------------------------------------
 
 
 % do some basic checks on the input arguments
 if nargin ~= 5
-	error('flatmononoise: incorrect number of input arguments');
+	error('%s: incorrect number of input arguments', mfilename);
 end
 
 if duration <=0
-	error('flatmononoise: duration must be > 0')
+	error('%s: duration must be > 0', mfilename)
 end
 if low > high
-	error('flatmononoise: low freq must be < high freq limit');
+	error('%s: low freq must be < high freq limit', mfilename);
 end
 
 CAL = 0;

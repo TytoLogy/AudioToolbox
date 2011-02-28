@@ -2,7 +2,7 @@ function S = synSpeakerID(speakerazel, Fs, scale, caldata)
 %-------------------------------------------------------------------------
 %S = synSpeakerID(speakerazel, Fs, scale, caldata)
 %-------------------------------------------------------------------------
-% Synthesis Toolbox
+% Audio Toolbox -> Synthesis
 %-------------------------------------------------------------------------
 % 
 % given speaker location [az el], returns an output signal (sample rate of
@@ -26,10 +26,11 @@ function S = synSpeakerID(speakerazel, Fs, scale, caldata)
 
 %--------------------------------------------------------------------------
 % Sharad J. Shanbhag
-% sharad.shanbhag@einstein.yu.edu
+% sshanbhag@neoucom.edu
 %--------------------------------------------------------------------------
 % Created: 15 March, 2010 (SJS) from synmononoise
 % Revision History:
+%	28 Feb 2011 (SJS):	updated comments/information
 %--------------------------------------------------------------------------
 
 % do some basic checks on the input arguments

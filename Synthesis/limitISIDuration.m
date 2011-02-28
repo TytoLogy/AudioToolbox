@@ -2,6 +2,8 @@ function ISIcell = limitISIDuration(ISIarr, Maxpts)
 %------------------------------------------------------------------------
 % ISInew = limitISIDuration(ISIarr, Maxpts)
 %------------------------------------------------------------------------
+% Audio Toolbox -> Synthesis
+%------------------------------------------------------------------------
 % 
 % given an ISI (inter stimulus interval) array os size [Nchan, Nisi], 
 % return only the ISIs that fall within a total stimulus 
@@ -25,12 +27,13 @@ function ISIcell = limitISIDuration(ISIarr, Maxpts)
 %------------------------------------------------------------------------
 
 %------------------------------------------------------------------------
-%  Sharad J. Shanbhag
-%	sharad.shanbhag@einstein.yu.edu
+% Sharad J. Shanbhag
+% sshanbhag@neoucom.edu
 %------------------------------------------------------------------------
 % Created: 19 Feb, 2010 (SJS)
 %
 % Revisions:
+%	28 Feb 2011 (SJS):	updated comments
 %------------------------------------------------------------------------
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
