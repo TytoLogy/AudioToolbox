@@ -3,6 +3,8 @@ function [S, Scale, Smag, Sphase] = syn_headphonenoise_fft(duration, Fs, low, hi
 % [S, Scale, Smag, Sphase]  = syn_headphonenoise_fft(duration, Fs, low,
 %												high, usitd, caldata, Smag, Sphase)
 %-------------------------------------------------------------------------
+%	Audio Toolbox: Synthesis
+%-------------------------------------------------------------------------
 %
 % Using inverse FFT, Synthesize broadband noise for headphone presentation
 % Normally, this function is not called directly, but is accessed through 
@@ -56,7 +58,7 @@ function [S, Scale, Smag, Sphase] = syn_headphonenoise_fft(duration, Fs, low, hi
 
 %-------------------------------------------------------------------------
 % Sharad J. Shanbhag
-% sshanbha@aecom.yu.edu
+% sshanbhag@neomed.edu
 %
 % 	Code adapted from synth library developed by
 % 	Ben Arthur, Chris Malek & Jamie Mazer in the Konishi lab at Caltech

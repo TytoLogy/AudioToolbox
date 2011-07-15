@@ -2,7 +2,7 @@ function [S, Smag, Sphase, oStr]  = synmononoise_fft(duration, Fs, low, high, sc
 %-------------------------------------------------------------------------
 % [S, Smag, Sphase, oStr]  = synmononoise_fft(duration, Fs, low, high, scale, caldata)
 %-------------------------------------------------------------------------
-% Synthesis Toolbox
+%	Audio Toolbox: Synthesis
 %-------------------------------------------------------------------------
 % 
 % 	synthesize a single-channel (mono) stimulus, typically for use with 
@@ -26,12 +26,12 @@ function [S, Smag, Sphase, oStr]  = synmononoise_fft(duration, Fs, low, high, sc
 % 		oStr				diagnostic output string
 % 
 %-------------------------------------------------------------------------
-% See Also: syn_headphone_noise
+% See Also: syn_headphone_noise, syn_headphonenoise_fft
 %--------------------------------------------------------------------------
 
 %--------------------------------------------------------------------------
 % Sharad J. Shanbhag
-% sharad.shanbhag@aecom.yu.edu
+% sshanbhag@neomed.edu
 % 	Some elements adapted from XDPHYS synth library developed by
 % 	Jamie Mazer and Ben Arthur in the Konishi Lab at Caltech
 %--------------------------------------------------------------------------
@@ -125,7 +125,15 @@ Sfull = buildfft(Sred(1, :));
 Sraw = ifft(Sfull, NFFT);
 
 % compute the scale factor
-scale_f = 0.5 * Fs * scale / fstep;
+% scale_f = 0.5 * Fs * scale / fstep;
+%*******
+% 23 Aug 2010 (SJS)
+%*******
+if CAL
+	scale_f = caldata.DAscale * 0.5 * sqrt(NFFT) * (1/sqrt(2));
+else
+	scale_f = 0.5 * sqrt(NFFT) * (1/sqrt(2));
+end
 
 % cut out the stimulus from raw vector
 S = scale_f *real(Sraw(1:stimlen));
