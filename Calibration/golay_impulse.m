@@ -67,6 +67,9 @@ fftb = fft(Bi, nfft);
 fftar = fft(Ar, nfft);
 fftbr = fft(Br, nfft);
 
+size(fftar)
+size(ffta)
+
 %multiply the response and the conjugate of the raw sequence ffts
 AHw = fftar .* conj(ffta);
 BHw = fftbr .* conj(fftb);
