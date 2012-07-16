@@ -9,7 +9,7 @@ function y = insert_delay(a, delay, fs)
 %
 %-----------------------------------------------------------------------------
 % Input Arguments:
-% 	a			[1XN] vector
+% 	a			[NXM] vector where N = # of channels, M = # of samples
 % 	delay		delay in milliseconds
 %	fs			sample rate (samples/sec)
 %
@@ -26,12 +26,16 @@ function y = insert_delay(a, delay, fs)
 % Created: ?? ?????, ???? (SJS)
 %
 % Revisions:
-%	28 Feb 2011 (SJS):	added comments in header
+%	28 Feb 2011 (SJS): added comments in header
+%	12 Jul 2012 (SJS): modified to work with N-channel data
 %-----------------------------------------------------------------------------
 % TO DO:
 %-----------------------------------------------------------------------------
 
 
+% old  
+% y = [zeros(1, ceil(fs * delay / 1000)) a];
 
-y = [zeros(1, ceil(fs * delay / 1000)) a];
-
+delaypts = ceil(fs * delay / 1000);
+[n, ~] = size(a);
+y = [zeros(n, delaypts) a];
