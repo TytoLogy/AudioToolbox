@@ -190,6 +190,9 @@ function Update_ctrl_Callback(hObject, eventdata, handles)
 				e1 = caldata.leakmag_stderr(1, :);
 				e2 = caldata.leakmag_stderr(2, :);
 				y_label = 'Leak Intensity (db SPL)';
+			else
+				warndlg('no leakmag data', mfilename);
+				return
 			end
 		%--------------------------------
 		% 6: Leak Phase (crosstalk)
