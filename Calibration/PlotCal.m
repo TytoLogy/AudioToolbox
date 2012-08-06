@@ -106,6 +106,14 @@ function PlotCal_OpeningFcn(hObject, eventdata, handles, varargin)
 		guidata(hObject, handles);
 		% update the plot
 		Update_ctrl_Callback(hObject, eventdata, handles);
+	else
+		handles.pdata = struct(	'freq', [], ...
+										'v1', [], ...
+										'v2', [], ...
+										'e1', [], ...
+										'e2', [], ...
+										'y_label', [], ...
+										'cmd', [] );
 	end
 	% Update handles structure
 	guidata(hObject, handles);
@@ -132,7 +140,9 @@ function Update_ctrl_Callback(hObject, eventdata, handles)
 		msgbox('No data loaded', 'PlotCal error');
 		return
 	end
-		
+	
+	pdata.x = caldata.freq;
+	
 	popup_sel_index = get(handles.PlotMenu, 'Value');
 	switch popup_sel_index
 		%--------------------------------
@@ -140,31 +150,31 @@ function Update_ctrl_Callback(hObject, eventdata, handles)
 		%--------------------------------
 	    case 1
 			if isfield(caldata,'magdbspl')
-				plot.v1 = caldata.mag(1, :);
-				plot.v2 = caldata.mag(2, :);
-				plot.e1 = caldata.mag_stderr(1, :);
-				plot.e2 = caldata.mag_stderr(2, :);	
-				plot.y_label = 'Max Intensity (db SPL)';
+				pdata.v1 = caldata.mag(1, :);
+				pdata.v2 = caldata.mag(2, :);
+				pdata.e1 = caldata.mag_stderr(1, :);
+				pdata.e2 = caldata.mag_stderr(2, :);	
+				pdata.y_label = 'Max Intensity (db SPL)';
 			else
-				plot.v1 = caldata.mag(1, :);
-				plot.v2 = caldata.mag(2, :);
-				plot.e1 = caldata.mag_stderr(1, :);
-				plot.e2 = caldata.mag_stderr(2, :);	
-				plot.y_label = 'Mag (db SPL)';
+				pdata.v1 = caldata.mag(1, :);
+				pdata.v2 = caldata.mag(2, :);
+				pdata.e1 = caldata.mag_stderr(1, :);
+				pdata.e2 = caldata.mag_stderr(2, :);	
+				pdata.y_label = 'Mag (db SPL)';
 			end
-			plot.cmd = @errorbar;
+			pdata.cmd = @errorbar;
 
 		%--------------------------------
 		% 2: Maginv
 		%--------------------------------
 		case 2
 			if isfield(caldata, 'maginv')
-				plot.v1 = db(caldata.maginv(1, :));
-				plot.v2 = db(caldata.maginv(2, :));
-	 			plot.e1 = zeros(size(v1));
-				plot.e2 = plot.e1;	
-				plot.y_label = 'Correction Intensity (db SPL)';
-				plot.cmd = @plot;
+				pdata.v1 = db(caldata.maginv(1, :));
+				pdata.v2 = db(caldata.maginv(2, :));
+	 			pdata.e1 = zeros(size(pdata.v1));
+				pdata.e2 = pdata.e1;	
+				pdata.y_label = 'Correction Intensity (db SPL)';
+				pdata.cmd = @plot;
 			end
 		%--------------------------------
 		% 3: Phase
@@ -172,34 +182,34 @@ function Update_ctrl_Callback(hObject, eventdata, handles)
 		case 3
 			if isfield(caldata, 'phase')
 				% convert phases from angle (RADIANS) to microsecond
-				plot.v1 = (1.0e6 * unwrap(caldata.phase(1, :))) ./ (2 * pi * caldata.freq);
-				plot.v2 = (1.0e6 * unwrap(caldata.phase(2, :))) ./ (2 * pi * caldata.freq);
-				plot.e1 = (1.0e6 * unwrap(caldata.phase_stderr(1, :))) ./ (2 * pi * caldata.freq);
-				plot.e2 = (1.0e6 * unwrap(caldata.phase_stderr(2, :))) ./ (2 * pi * caldata.freq);
-				plot.y_label = 'Phase (us)';
-				plot.cmd = @errorbar;
+				pdata.v1 = (1.0e6 * unwrap(caldata.phase(1, :))) ./ (2 * pi * caldata.freq);
+				pdata.v2 = (1.0e6 * unwrap(caldata.phase(2, :))) ./ (2 * pi * caldata.freq);
+				pdata.e1 = (1.0e6 * unwrap(caldata.phase_stderr(1, :))) ./ (2 * pi * caldata.freq);
+				pdata.e2 = (1.0e6 * unwrap(caldata.phase_stderr(2, :))) ./ (2 * pi * caldata.freq);
+				pdata.y_label = 'Phase (us)';
+				pdata.cmd = @errorbar;
 			end
 		%--------------------------------
 		% 4: Distortion
 		%--------------------------------
 		case 4
 			if isfield(caldata, 'dist')
-				plot.v1 = caldata.dist(1, :);
-				plot.v2 = caldata.dist(2, :);
-				plot.y_label = 'Distortion (%)';
-				plot.cmd = @plot;
+				pdata.v1 = caldata.dist(1, :);
+				pdata.v2 = caldata.dist(2, :);
+				pdata.y_label = 'Distortion (%)';
+				pdata.cmd = @plot;
 			end
 		%--------------------------------
 		% 5: Leak Intensity (crosstalk)
 		%--------------------------------
 		case 5
 			if isfield(caldata, 'leakmag')
-				plot.v1 = caldata.leakmag(1, :);
-				plot.v2 = caldata.leakmag(2, :);
-				plot.e1 = caldata.leakmag_stderr(1, :);
-				plot.e2 = caldata.leakmag_stderr(2, :);
-				plot.y_label = 'Leak Intensity (db SPL)';
-				plot.cmd = @errorbar;
+				pdata.v1 = caldata.leakmag(1, :);
+				pdata.v2 = caldata.leakmag(2, :);
+				pdata.e1 = caldata.leakmag_stderr(1, :);
+				pdata.e2 = caldata.leakmag_stderr(2, :);
+				pdata.y_label = 'Leak Intensity (db SPL)';
+				pdata.cmd = @errorbar;
 			else
 				warndlg('no leakmag data', mfilename);
 				return
@@ -210,52 +220,52 @@ function Update_ctrl_Callback(hObject, eventdata, handles)
 		case 6
 			if isfield(caldata, 'leakphase')
 				% convert phases from angle (RADIANS) to microsecond
-				plot.v1 = (1.0e6 * unwrap(caldata.leakphase(1, :))) ./ (2 * pi * caldata.freq);
-				plot.v2 = (1.0e6 * unwrap(caldata.leakphase(2, :))) ./ (2 * pi * caldata.freq);
-				plot.y_label = 'Leak Phase (us)';
-				plot.cmd = @plot;
+				pdata.v1 = (1.0e6 * unwrap(caldata.leakphase(1, :))) ./ (2 * pi * caldata.freq);
+				pdata.v2 = (1.0e6 * unwrap(caldata.leakphase(2, :))) ./ (2 * pi * caldata.freq);
+				pdata.y_label = 'Leak Phase (us)';
+				pdata.cmd = @plot;
 			end
 		%--------------------------------
 		% 7: Leak Distortion (crosstalk)
 		%--------------------------------
 		case 7
 			if isfield(caldata, 'leakdist')
-				plot.v1 = caldata.leakdist(1, :);
-				plot.v2 = caldata.leakdist(2, :);
-				plot.y_label = 'Leak Distortion (%)';
-				plot.cmd = @plot;
+				pdata.v1 = caldata.leakdist(1, :);
+				pdata.v2 = caldata.leakdist(2, :);
+				pdata.y_label = 'Leak Distortion (%)';
+				pdata.cmd = @plot;
 			end
 		%--------------------------------
 		% 8: magnitude std. error
 		%--------------------------------
 		case 8
 			if isfield(caldata, 'mag_stderr')
-				plot.v1 = caldata.mag_stderr(1, :);
-				plot.v2 = caldata.mag_stderr(2, :);
-				plot.y_label = 'Mag stderr';
-				plot.cmd = @plot;
+				pdata.v1 = caldata.mag_stderr(1, :);
+				pdata.v2 = caldata.mag_stderr(2, :);
+				pdata.y_label = 'Mag stderr';
+				pdata.cmd = @plot;
 			end
 		%--------------------------------
 		% 9: phase std. error
 		%--------------------------------
 		case 9	
 			if isfield(caldata, 'phase_stderr')
-				plot.v1 = (1.0e6 * unwrap(caldata.phase_stderr(1, :))) ./ (2 * pi * caldata.freq);
-				plot.v2 = (1.0e6 * unwrap(caldata.phase_stderr(2, :))) ./ (2 * pi * caldata.freq);
-				plot.y_label = 'Phase stderr';
-				plot.cmd = @plot;
+				pdata.v1 = (1.0e6 * unwrap(caldata.phase_stderr(1, :))) ./ (2 * pi * caldata.freq);
+				pdata.v2 = (1.0e6 * unwrap(caldata.phase_stderr(2, :))) ./ (2 * pi * caldata.freq);
+				pdata.y_label = 'Phase stderr';
+				pdata.cmd = @plot;
 			end
 		%--------------------------------
 		% 10: Background
 		%--------------------------------
 	    case 10
 			if isfield(caldata,'background')
-				plot.v1 = caldata.background(1, :);
-				plot.v2 = caldata.background(2, :);
-				plot.e1 = caldata.background_stderr(1, :);
-				plot.e2 = caldata.background_stderr(2, :);	
-				plot.y_label = 'Background Intensity (db SPL)';
-				plot.cmd = @errorbar;
+				pdata.v1 = caldata.background(1, :);
+				pdata.v2 = caldata.background(2, :);
+				pdata.e1 = caldata.background_stderr(1, :);
+				pdata.e2 = caldata.background_stderr(2, :);	
+				pdata.y_label = 'Background Intensity (db SPL)';
+				pdata.cmd = @errorbar;
 			else
 				warndlg('no background data', mfilename);
 				return
@@ -263,25 +273,27 @@ function Update_ctrl_Callback(hObject, eventdata, handles)
 
 	end
 
+	%-------------------------------------------------------------------
 	% check if plot selected is 1 (magnitude) 2 (mag inverse) or 5 (Leak mag)
+	%-------------------------------------------------------------------
 	if any(popup_sel_index == [1 2 5 10])
 		% check on channel(s) to plot
 		if handles.Channel == 1
-			errorbar(caldata.freq, v1, e1, 'g.-');
+			errorbar(caldata.freq, pdata.v1, pdata.e1, 'g.-');
 			legend({'L'})
 		elseif handles.Channel == 2
-			errorbar(caldata.freq, v2, e2, 'r.-');
+			errorbar(caldata.freq, pdata.v2, pdata.e2, 'r.-');
 			legend({'R'})		
 		elseif handles.Channel == 3
-			errorbar(caldata.freq, v1, e1, 'g.-');
+			errorbar(caldata.freq, pdata.v1, pdata.e1, 'g.-');
 			hold on;
-			errorbar(caldata.freq, v2, e2, 'r.-');
+			errorbar(caldata.freq, pdata.v2, pdata.e2, 'r.-');
 			hold off;
 			legend({'L', 'R'})
 		end
-				
+		% if ref channel data were collected, plot them
 		if isfield(handles, 'ReferenceChannel')
-			if handles.ReferenceChannel & (popup_sel_index) == 1
+			if handles.ReferenceChannel && (popup_sel_index) == 1
 				if handles.ReferenceChannel == 3
 					hold on;
 					plot(caldata.freq, caldata.mag(3, :), 'k.-');
@@ -296,31 +308,43 @@ function Update_ctrl_Callback(hObject, eventdata, handles)
 				end
 			end
 		end
+	%-------------------------------------------------------------------
+	% plot other types
+	%-------------------------------------------------------------------
 	else
 		if handles.Channel == 1
-			plot(caldata.freq, v1, 'g.-');
+			plot(caldata.freq, pdata.v1, 'g.-');
 			legend({'L'})
 		elseif handles.Channel == 2
-			plot(caldata.freq, v2, 'r.-');
+			plot(caldata.freq, pdata.v2, 'r.-');
 			legend({'R'})		
 		elseif handles.Channel == 3
-			plot(caldata.freq, v1, 'g.-', caldata.freq, v2, 'r.-');
+			plot(caldata.freq, pdata.v1, 'g.-', caldata.freq, pdata.v2, 'r.-');
 			legend({'L', 'R'})
 		end
 	end
+	
+	%-------------------------------------------------------------------
+	% Plot display settings
+	%-------------------------------------------------------------------
+	% Update labels
 	xlabel('Frequency');
-	ylabel(y_label);
+	ylabel(pdata.y_label);
+	% Turn on Grid
 	set(gca, 'XGrid', 'on');
 	set(gca, 'YGrid', 'on');
+	% set background color
 	set(gca, 'Color', .5*[1 1 1]);
+	% set scale 
 	if handles.XScale == 1
 		set(gca, 'XScale', 'linear')
 	else
 		set(gca, 'XScale', 'log');
 	end
+	% legend
 	legend(gca, 'Location', 'Best');
 	legend(gca, 'boxoff');
-	
+	% update Dataname string
 	if isfield(caldata, 'settings')
 		if isfield(caldata.settings, 'calfile')
 			update_ui_str(handles.Dataname, caldata.settings.calfile);
@@ -328,6 +352,12 @@ function Update_ctrl_Callback(hObject, eventdata, handles)
 	else
 		update_ui_str(handles.Dataname, 'unknown calfile name');
 	end
+	
+	%-------------------------------------------------------------------
+	% store pdata struct in handles, update hObject
+	%-------------------------------------------------------------------
+	handles.pdata = pdata;
+	guidata(hObject, handles);
 %-------------------------------------------------------------------------
 
 %-------------------------------------------------------------------------
@@ -476,13 +506,59 @@ function SaveFigureMenuItem_Callback(hObject, eventdata, handles)
 %-------------------------------------------------------------------------
 %-------------------------------------------------------------------------
 function IndividualPlotMenuItem_Callback(hObject, eventdata, handles)
+	% create new figure
+	figure	
+	% copy 
+	a = axes;
+	ax2ax(handles.axes1, a)
+	plotStrings = read_ui_str(handles.PlotMenu);
+	plotVal = read_ui_val(handles.PlotMenu);
 	
+	if isfield(handles.caldata, 'settings')
+		if isfield(handles.caldata.settings, 'calfile')
+			[pname, fname, ~] = fileparts(handles.caldata.settings.calfile);
+		else
+			fname = {};
+		end
+	else
+		fname = {};
+	end	
 
-
+	if ~isempty(fname)
+		tstr = {plotStrings{plotVal}, fname};
+	else
+		tstr = plotStrings{plotVal};
+	end
+	
+	
+	title(tstr, 'Interpreter', 'none')
 %-------------------------------------------------------------------------
 %-------------------------------------------------------------------------
 
+%-------------------------------------------------------------------------
+%-------------------------------------------------------------------------
+function ax2ax(hSource, hDest)
+	% Copy everything on one axes to another.
 
+	% Find children, copy non-text ones.
+	kids=allchild(hSource);
+	nontextkids=kids(~strcmp(get(kids,'type'),'text'));
+	copyobj(nontextkids,hDest);
+
+	% Axes Directions (may need to add other properties)
+	meth={'YDir','XLim','YLim'};
+	cellfun(@(m)set(hDest,m,get(hSource,m)),meth);
+
+	% Special treatment for text-children
+	axes(hDest)
+	xlabel(get(get(hSource,'xlabel'),'string'));
+	ylabel(get(get(hSource,'ylabel'),'string'));
+	title(get(get(hSource,'title'),'string'));
+	set(hDest, 'XScale', get(hSource, 'XScale'))
+	set(hDest, 'XGrid', get(hSource, 'XGrid'));
+	set(hDest, 'YGrid', get(hSource, 'YGrid'));
+%-------------------------------------------------------------------------
+%-------------------------------------------------------------------------
 
 %-------------------------------------------------------------------------
 %-------------------------------------------------------------------------
