@@ -464,7 +464,8 @@ function PlotChannelCtrl_Callback(hObject, eventdata, handles)
 
 %-------------------------------------------------------------------------
 function LoadCalMenuItem_Callback(hObject, eventdata, handles)
-	[calfile, calpath] = uigetfile('*_cal.mat','Load headphone calibration data from file...');
+	[calfile, calpath] = uigetfile( {'*.cal'; '*_cal.mat'}, ...
+												'Load headphone calibration data from file...');
 	if calfile ~=0
 		datafile = fullfile(calpath, calfile);	
 		handles.caldata = load_headphone_cal(datafile);
