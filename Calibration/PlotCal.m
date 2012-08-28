@@ -194,8 +194,8 @@ function Update_ctrl_Callback(hObject, eventdata, handles)
 		%--------------------------------
 		case 4
 			if isfield(caldata, 'dist')
-				pdata.v1 = caldata.dist(1, :);
-				pdata.v2 = caldata.dist(2, :);
+				pdata.v1 = caldata.dist(1, :) * 100;
+				pdata.v2 = caldata.dist(2, :) * 100;
 				pdata.y_label = 'Distortion (%)';
 				pdata.cmd = @plot;
 			end
@@ -230,8 +230,8 @@ function Update_ctrl_Callback(hObject, eventdata, handles)
 		%--------------------------------
 		case 7
 			if isfield(caldata, 'leakdist')
-				pdata.v1 = caldata.leakdist(1, :);
-				pdata.v2 = caldata.leakdist(2, :);
+				pdata.v1 = caldata.leakdist(1, :) * 100;
+				pdata.v2 = caldata.leakdist(2, :) * 100;
 				pdata.y_label = 'Leak Distortion (%)';
 				pdata.cmd = @plot;
 			end
