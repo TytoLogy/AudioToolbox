@@ -1,12 +1,9 @@
-function y = ramparray(a, dur, fs)
+function aout = buffer_filter(a, dur, fs, fcoeffb, fcoeffa)
 %------------------------------------------------------------------------
-% y = ramparray(a, dur, fs)
+% aout = buffer_filter(a, dur, fs, fcoeffb, fcoeffa)
 %------------------------------------------------------------------------
-% AudioToolbox:Utils
+% AudioToolbox:Filter
 %------------------------------------------------------------------------
-%		ramps up and down signal a over duration
-%		dur in ms.  fs = sample rate
-%
 %------------------------------------------------------------------------
 % Input Args:
 % 	fs = sample rate
@@ -20,30 +17,12 @@ function y = ramparray(a, dur, fs)
 % Sharad Shanbhag
 % sshanbhag@neomed.edu
 %------------------------------------------------------------------------
-% Created: a long time ago...
+% Created: 30 August, 2012 (SJS) from sin2array
 %
 % Revisions:
-%	30 Aug 2012 (SJS):	cleaned up comments & documentation 
 %------------------------------------------------------------------------
 
-[m, n] = size(a);
+[tmpa, bindx] = bufferarray(a, dur, fs);
 
-rampbins = floor(fs * dur / 1000);
-
-if 2*rampbins > length(a)
-	error('ramparray: ramp duration > length of stimulus');
-end
-
-ramp1 = linspace(0, 1, rampbins);
-ramp2 = linspace(1, 0, rampbins);
-
-y = [(ramp1 .* a(1, 1:rampbins)) ...
-		a(1, rampbins + 1:n - rampbins) ...
-		(ramp2 .* a(1, n-rampbins+1:n))];
-
-if m == 2
-	y2 = [(ramp1 .* a(2, 1:rampbins)) ...
-			a(2, rampbins + 1:n - rampbins) ...
-			(ramp2 .* a(2, n-rampbins+1:n))];
-	y = [y; y2];
-end
+tmpout = filtfilt(fcoeffb, fcoeffa, tmpa);
+aout = tmpout(bindx(1):bindx(2));

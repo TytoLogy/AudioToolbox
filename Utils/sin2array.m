@@ -2,6 +2,8 @@ function y = sin2array(a, dur, fs)
 %------------------------------------------------------------------------
 % y = sin2array(a, dur, fs)
 %------------------------------------------------------------------------
+% AudioToolbox:Utils
+%------------------------------------------------------------------------
 % 	ramps up and down signal a over duration dur in ms;
 % 
 % 	ramp profile is a squared sinusoid
