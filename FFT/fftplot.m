@@ -21,7 +21,7 @@ function [S, Smag, Sphase, Freq] = fftplot(s, Fs, f)
 
 %------------------------------------------------------------------------
 %  Sharad Shanbhag
-%	sshanbha@aecom.yu.edu
+%	sshanbhag@neomed.edu
 %------------------------------------------------------------------------
 % Created: ?????
 %
@@ -30,6 +30,10 @@ function [S, Smag, Sphase, Freq] = fftplot(s, Fs, f)
 % 		- revised scaling of Smag
 % 		- cleaned up some messy code
 % 		- cleaned up comments
+%	7 Sep 2012 (SJS):
+%	 -	changed email address
+% 	 -	fixed FFT length issue in freq and spectra
+% 			length should be (NFFT/2) + 1, not NFFT/2
 %------------------------------------------------------------------------
 
 if nargin < 2
@@ -72,10 +76,12 @@ NFFT = 2.^(nextpow2(N));
 S = fft(s, NFFT);
 
 %non-redundant points are kept
-Nunique = NFFT/2;
+% 7 sep 2012 (SJS): changed from nfft/2 into (nfft/2) + 1
+Nunique = (NFFT/2) + 1;
 Sunique = S(1:Nunique);
 
-% get the magnitudes of the FFT scale by 2 because we're taking only
+% get the magnitudes of the FFT, divide by N (length of input signal) &
+% scale by 2 because we're taking only
 % half of the points from the "full" FFT vector S;
 Smag = abs(Sunique)/N;
 Smag(2:end) = 2*Smag(2:end);
@@ -83,7 +89,7 @@ Sphase = angle(Sunique);
 
 % This is an evenly spaced frequency vector with Nunique points.
 % scaled by the Nyquist frequency (Fn ==1/2 sample freq.)
-Freq = (Fs/2)*linspace(0, 1, NFFT/2);
+Freq = (Fs/2)*linspace(0, 1, Nunique);
 
 % generate time vector
 time = ([1:N]-1) / Fs;
