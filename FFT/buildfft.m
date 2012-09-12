@@ -16,6 +16,7 @@ function fftfull = buildfft(fftred)
 %		y(N) = y*(2)
 %		y(N-1) = y*(3)
 %
+%	this function is used by the various synthesis routines 
 %-------------------------------------------------------------------------
 % Input Arguments:
 % 	fftred		complex form of the "single-sided spectrum"
@@ -44,20 +45,31 @@ function fftfull = buildfft(fftred)
 % 		- fixed issue with length of final vector
 %---------------------------------------------------------------------
 
-% N is total number of points in the spectrum
+% N is total number of points in the reduced spectrum
 N = length(fftred);
+Nunique = N + 1;
+% NFFT is length of full spectrum
+NFFT = 2*N;
 
 % allocate the net spectrum fftfull
-fftfull = zeros(1, 2*N);
+fftfull = zeros(1, NFFT);
 
+%% assign indices into fftfull for the two "sections"
 % first portion of fftfull is same as fftred
-% leave out the DC component (fftred(1))
-fftfull(2:N) = fftred(2:N);
+% also, leave DC component (fftfull(1)) as 0, since it is
+% assumed that fftred has only non-DC components
+indx1 = 2:Nunique;
+% second portion
+indx2 = (Nunique+1):NFFT;
 
-% second portion is complex conjugate of Sreduced and in reverse order
-% (setting  DC component to zero which is at fftreduced(1) and fftfull(end))
+fftfull(indx1) = fftred;
 
-fftfull((N+1):((2*N)-1)) = conj(fftred(N:-1:2));
+% second section is computed as:
+%	(1) take fftred(1:(end-1)), since final point (fftred(end)) 
+% 		 is common to both sections
+% 	(2) flip the fftred section around using fliplr (reverse order)
+% 	(3) take complex conjugate of flipped fftred
+fftfull(indx2) = conj(fliplr(fftred(1:(end-1))));
 
 
 
