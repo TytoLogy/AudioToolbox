@@ -2,7 +2,7 @@ function vrms_out = get_scale_db(desired_db, vrms, dbspl)
 %--------------------------------------------------------------------------
 % vrms_out = get_scale_db(desired_db, vrms, dbspl)
 %--------------------------------------------------------------------------
-% Calibration Toolbox 
+% AudioToolbox:Calibration
 %--------------------------------------------------------------------------
 % given desired stimulus level desired_db (in dB SPL), returns voltage rms 
 % scale value to achieve desired output level
