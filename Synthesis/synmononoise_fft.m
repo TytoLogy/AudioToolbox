@@ -59,7 +59,7 @@ end
 if low >= high
 	error('synmononoise_fft: low freq must be < high freq limit');
 end
-if (low <= 0) | (high <= 0)
+if (low <= 0) || (high <= 0)
 	error('synmononoise_fft: low  & high  must be greater than 0');
 end
 if high > Fs / 2
@@ -137,8 +137,6 @@ end
 
 % cut out the stimulus from raw vector
 S = scale_f *real(Sraw(1:stimlen));
-
-max(imag(Sraw))
 
 if nargout == 4
 	oStr = sprintf('scale: %.2f \t max: %.4f \t rms: %.4f \t dB: %.4f',...
