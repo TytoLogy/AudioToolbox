@@ -43,7 +43,10 @@ function fftfull = buildfft(fftred)
 %	6 Sep 2012 (SJS):
 %		- updated comments
 % 		- fixed issue with length of final vector
+%	17 Sep 2012 (SJS): fixed bug in building fftfull array
 %---------------------------------------------------------------------
+
+%{
 
 % N is total number of points in the reduced spectrum
 N = length(fftred);
@@ -70,6 +73,27 @@ fftfull(indx1) = fftred;
 % 	(2) flip the fftred section around using fliplr (reverse order)
 % 	(3) take complex conjugate of flipped fftred
 fftfull(indx2) = conj(fliplr(fftred(1:(end-1))));
+%}
 
+%**** original algorithm
+%{
+% N is total number of points in the spectrum minus DC component 
+N = length(fftred) - 1;
+% allocate the net spectrum fftfull
+fftfull = zeros(1, N*2);
+% first portion of fftfull is same as fftred
+fftfull(1:(N+1)) = fftred;
+% second portion is complex conjugate of Sreduced and in reverse order
+% (leaving out DC component which is at Sreduced(1))
+fftfull((N+2):(2*N)) = conj(fftred(N:-1:2));
+%}
+
+keyboard
+
+N = length(fftred);
+NFFT = 2*(N-1);
+fftfull = zeros(1, NFFT);
+fftfull(1:N) = fftred;
+fftfull((N+1):end) = conj(fliplr(fftred(2:(end-1))));
 
 
