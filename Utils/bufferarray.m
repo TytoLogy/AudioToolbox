@@ -28,7 +28,7 @@ function [y, bindx, b1, b2] = bufferarray(a, dur, fs)
 
 [m, n] = size(a);
 
-bufferbins = floor(fs * dur / 1000)
+bufferbins = floor(fs * dur / 1000);
 
 if 2*bufferbins > length(a)
 	error('%s: bufferbins duration > length of stimulus', mfilename);
