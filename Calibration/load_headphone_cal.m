@@ -52,7 +52,7 @@ if ~exist(filename)
 	error(['Calibration file ' filename ' not found']);
 end
 
-load(filename);
+load(filename, '-MAT');
 
 caldata.phase_us = caldata.phase;
 % preconvert phases from angle (RADIANS) to microsecond

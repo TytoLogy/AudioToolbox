@@ -1,44 +1,89 @@
 function caldata  = fake_caldata(varargin)
+%------------------------------------------------------------------------
 % caldata  = fake_caldata(varargin)
+%------------------------------------------------------------------------
 %
 % Creates a fake caldata structure with flat response
 % 
+%------------------------------------------------------------------------
 % Input Arguments:
+% 
+% Output Arguments:
+% 	caldata		caldata struct
 %
-% Returned arguments:
+%------------------------------------------------------------------------
 %
 % See Also: load_headphone_cal
 %--------------------------------------------------------------------------
 
 %--------------------------------------------------------------------------
 % Sharad J. Shanbhag
-% sshanbha@aecom.yu.edu
+% sshanbhag@neomed.edu
 %--------------------------------------------------------------------------
 % Created: 12 June, 2009
 % 
 % Revision History:
+%	1 Oct 2012 (SJS):
+%	 -	updated comments format
+%	 - implemented varargin for user control of caldata parameters
 %--------------------------------------------------------------------------
 
-minfreq = 20;
-maxfreq = 20000;
-freqstep = 100;
 
-freqs = (minfreq:freqstep:maxfreq);
+% some defaults
+MINFREQ = 20;
+MAXFREQ = 20000;
+FREQSTEP = 100;
+freqs = (MINFREQ:FREQSTEP:MAXFREQ);
+FS =  4.8828e+004;
+DASCALE = 5;
+
+% loop through # variable input args
+nvararg = length(varargin);
+if nvararg
+	aindex = 1;
+	while aindex < nvararg
+		switch(upper(varargin{aindex}))
+			
+			% set freqs 
+			case 'FREQS'
+				if isnumeric(varargin{aindex+1})
+					freqs = varargin{aindex+1};
+					aindex = aindex + 2;
+				else
+					error('%s: bad freqs vector', mfilename);
+				end
+				
+			% set DASCALE
+			case 'DASCALE'
+				if isnumeric(varargin{aindex+1})
+					DASCALE = varargin{aindex+1};
+					aindex = aindex + 2;
+				else
+					error('%s: bad DASCALE (%s)', mfilename, varargin{aindex+1});
+				end
+				
+			% trap unknown input command
+			otherwise
+				error('%s: unknown argument %s', mfilename, varargin{aindex});
+		end		% end of SWITCH
+	end		% end of WHILE
+end		% end of IF
+
+% determine length of freqs vector and build zero arrays
 nfreqs = length(freqs);
-
 onearray = ones(2, nfreqs);
 zeroarray = zeros(2, nfreqs);
 
 caldata.time_str = [date ' ' time];
 caldata.timestamp = now;
-caldata.adFc =  4.8828e+004;
-caldata.daFc =  4.8828e+004;
+caldata.adFc =  FS;
+caldata.daFc =  FS;
 caldata.nrasters = nfreqs;
-caldata.range = [minfreq freqstep maxfreq];
+caldata.range = [min(freqs) (freqs(2) - freqs(1)) max(freqs)];
 caldata.reps = 2;
 caldata.settings = [];
 caldata.frdata = [];
-caldata.atten = [];
+caldata.atten = zeroarray;
 caldata.max_spl = 50;
 caldata.min_spl = 40;
 caldata.frfile = [];
@@ -48,7 +93,7 @@ caldata.phase =  zeroarray;
 caldata.dist =  zeroarray;
 caldata.mag_stderr =  zeroarray;
 caldata.phase_stderr =  zeroarray;
-caldata.DAscale = 5;
+caldata.DAscale = DASCALE;
 caldata.dist_stderr =  zeroarray;
 caldata.leakmag =  zeroarray;
 caldata.leakmag_stderr =  zeroarray;

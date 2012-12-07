@@ -40,7 +40,7 @@ function [S, Smag, Sphase, oStr]  = synmononoise_fft(duration, Fs, low, high, sc
 % 		-created from synnoise_fft
 %  1 June, 2009 (SJS):
 %		- fixed scaling issues!  
-%		- added computatation of Scale values by rms() function, removed old
+%		- added computation of Scale values by rms() function, removed old
 %		  broken-down code that was incorrect (normalization)
 %		- added division of mags by 1/freqstep in order to preserve
 %		  Parseval's theorem
@@ -59,7 +59,7 @@ end
 if low >= high
 	error('synmononoise_fft: low freq must be < high freq limit');
 end
-if (low <= 0) | (high <= 0)
+if (low <= 0) || (high <= 0)
 	error('synmononoise_fft: low  & high  must be greater than 0');
 end
 if high > Fs / 2
