@@ -1,6 +1,6 @@
-function [f, mag, maxf, maxmag] = daqdbfft(dataV, Fs, blocksize, plotFlag)
+function [f, mag, maxf, maxmag] = daqdbfft(dataV, Fs, blocksize, plotFlag, padFlag)
 %------------------------------------------------------------------------
-% [f, mag, maxf, maxmag] = daqdbfft(dataV, Fs, blocksize, plotFlag)
+% [f, mag, maxf, maxmag] = daqdbfft(dataV, Fs, blocksize, plotFlag, padFlag)
 %------------------------------------------------------------------------
 % TytoLogy Project
 % AudioToolbox:FFT
@@ -8,7 +8,9 @@ function [f, mag, maxf, maxmag] = daqdbfft(dataV, Fs, blocksize, plotFlag)
 %  [F,MAG] = daqdbfft(X,FS,BLOCKSIZE) calculates the FFT of X
 %    using sampling frequency FS and the SamplesPerTrigger provided
 %    in BLOCKSIZE.
-% 
+% if plotFlag is set to 1, plot of magnitude vs. frequency will be shown
+% if padFlag is set, data will be zero padded to next power of length of
+% dataV
 %------------------------------------------------------------------------
 % See also: DAQ Toolbox 
 %------------------------------------------------------------------------
@@ -26,9 +28,19 @@ function [f, mag, maxf, maxmag] = daqdbfft(dataV, Fs, blocksize, plotFlag)
 if ~exist('plotFlag', 'var');
 	plotFlag = 0;
 end
+if ~exist('padFlag', 'var');
+	padFlag = 0;
+end
+
+if padFlag
+	blocksize = length(dataV);
+	NFFT = 2^nextpow2(blocksize);
+else
+	NFFT = blocksize;
+end
 
 % take fft of data, get magnitude, and normalize by blocksize
-xfft = abs(fft(dataV))./blocksize;
+xfft = abs(fft(dataV, NFFT))./blocksize;
 % Avoid taking the log of 0.
 xfft(xfft == 0) = 1e-17;
 % compute dB SPL keep only 1:NFFT components (other 1/2 is repeat)

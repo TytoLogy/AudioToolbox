@@ -40,7 +40,7 @@ function [S, Smag, Sphase, oStr]  = synmononoise_fft(duration, Fs, low, high, sc
 % 		-created from synnoise_fft
 %  1 June, 2009 (SJS):
 %		- fixed scaling issues!  
-%		- added computatation of Scale values by rms() function, removed old
+%		- added computation of Scale values by rms() function, removed old
 %		  broken-down code that was incorrect (normalization)
 %		- added division of mags by 1/freqstep in order to preserve
 %		  Parseval's theorem
