@@ -59,7 +59,7 @@ end
 if low >= high
 	error('synmononoise_fft: low freq must be < high freq limit');
 end
-if (low <= 0) | (high <= 0)
+if (low <= 0) || (high <= 0)
 	error('synmononoise_fft: low  & high  must be greater than 0');
 end
 if high > Fs / 2
