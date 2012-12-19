@@ -31,7 +31,6 @@ function fftfull = buildfft(fftred)
 % 							.
 % 							.
 % 							fftred(N) = freq(N-1) (max freq term)
-
 %-------------------------------------------------------------------------
 % Output Arguments:
 % 	fftfull		complex, 2-sided (MATLAB) format spectrum, useful for ifft
@@ -57,8 +56,6 @@ function fftfull = buildfft(fftred)
 %	17 Sep 2012 (SJS): fixed bug in building fftfull array
 %---------------------------------------------------------------------
 
-
-
 % N is total number of points in the reduced spectrum
 N = length(fftred);
 % NFFT is final fft vector length
@@ -76,7 +73,6 @@ fftfull((N+1):end) = conj(fliplr(fftred(2:(end-1))));
 
 
 %{
-
 % N is total number of points in the reduced spectrum
 N = length(fftred);
 Nunique = N + 1;
@@ -93,9 +89,7 @@ fftfull = zeros(1, NFFT);
 indx1 = 2:Nunique;
 % second portion
 indx2 = (Nunique+1):NFFT;
-
 fftfull(indx1) = fftred;
-
 % second section is computed as:
 %	(1) take fftred(1:(end-1)), since final point (fftred(end)) 
 % 		 is common to both sections
