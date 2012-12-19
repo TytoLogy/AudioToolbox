@@ -82,11 +82,7 @@ end
 nvararg = length(varargin);
 if nvararg
 	aindex = 1;
-<<<<<<< HEAD
 	while aindex < nvararg
-=======
-	while aindex <= nvararg
->>>>>>> origin/sjs_working
 		switch(upper(varargin{aindex}))
 			
 			% set scaling factor SCALE_F
