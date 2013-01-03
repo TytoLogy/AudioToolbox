@@ -30,7 +30,7 @@ function [atten_val, spl_val] = figure_headphone_atten(spl_val, rms_val, caldata
 
 %---------------------------------------------------------------------
 %	Sharad Shanbhag
-%	sharad.shanbhag@einstein.yu.edu
+%	sshanbhag@neomed.edu
 %
 %--Revision History---------------------------------------------------
 %	12 Feb, 2008, SJS:	created
@@ -38,6 +38,10 @@ function [atten_val, spl_val] = figure_headphone_atten(spl_val, rms_val, caldata
 %						changed scale_val variable to rms_val to more accurately
 % 						reflect data type
 %	9 Dec, 2009 (SJS):	added varargin to allow input of L/R Enable
+%	2 Jan, 2013 (SJS):
+%	 -	fixed stupid error in spl_val calculation when varargin is 
+% 		provided (l/r headphone enable)
+% 	 -	updated documentation email
 %---------------------------------------------------------------------
 
 MAXATTEN = 120;
@@ -46,7 +50,7 @@ MINATTEN = 0;
 % check and see if L/R enable was provided, if so, modify spl_cal
 % accordingly
 if ~isempty(varargin)
-	spl_val = spl_val .* (varargin{1}(1) & varargin{1}(2));
+	spl_val = spl_val .* varargin{1};
 end
 
 if spl_val(1) == 0
