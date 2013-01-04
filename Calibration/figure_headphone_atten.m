@@ -59,7 +59,7 @@ else
 	atten_val(1) = caldata.mindbspl(1) + db(rms_val(1)) - spl_val(1);
 end
 
-if atten_val(1) > MAXATTEN & spl_val(1) ~= 0
+if (atten_val(1) > MAXATTEN) && (spl_val(1) ~= 0)
 	disp([mfilename ' warning: requested lspl too low']);
 	atten_val(1) = MAXATTEN;
 elseif atten_val(1) < MINATTEN
@@ -67,7 +67,7 @@ elseif atten_val(1) < MINATTEN
 	atten_val(1) = MINATTEN;
 elseif isnan(atten_val(1))
 	disp([mfilename ' warning: NaN returned for lspl']);
-	disp(sprintf('lrms = %.4f, spl_val = %.4f', rms_val(1), spl_val(1)));
+	fprintf('lrms = %.4f, spl_val = %.4f\n', rms_val(1), spl_val(1));
 	atten_val(1) = MAXATTEN;
 end
 
@@ -77,7 +77,7 @@ else
 	atten_val(2) = caldata.mindbspl(2) + db(rms_val(2)) - spl_val(2);
 end
 
-if atten_val(2) > MAXATTEN & spl_val(2) ~= 0
+if (atten_val(2) > MAXATTEN) && (spl_val(2) ~= 0)
 	disp([mfilename ' warning: requested rspl too low']);
 	atten_val(2) = MAXATTEN;
 elseif atten_val(2) < MINATTEN
@@ -85,7 +85,7 @@ elseif atten_val(2) < MINATTEN
 	atten_val(2) = MINATTEN;
 elseif isnan(atten_val(2))
 	disp([mfilename ' warning: NaN returned for rspl']);
-	disp(sprintf('rrms = %.4f, spl_val = %.4f', rms_val(2), spl_val(2)));
+	fprintf('rrms = %.4f, spl_val = %.4f\n', rms_val(2), spl_val(2));
 	atten_val(1) = MAXATTEN;
 end
 
