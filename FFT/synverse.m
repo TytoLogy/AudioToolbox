@@ -82,7 +82,7 @@ end
 nvararg = length(varargin);
 if nvararg
 	aindex = 1;
-	while aindex <= nvararg
+	while aindex < nvararg
 		switch(upper(varargin{aindex}))
 			
 			% set scaling factor SCALE_F

@@ -138,6 +138,8 @@ end
 % cut out the stimulus from raw vector
 S = scale_f *real(Sraw(1:stimlen));
 
+max(imag(Sraw))
+
 if nargout == 4
 	oStr = sprintf('scale: %.2f \t max: %.4f \t rms: %.4f \t dB: %.4f',...
 						scale, max(S), rms(S), ...
