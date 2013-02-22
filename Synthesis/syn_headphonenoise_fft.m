@@ -1,6 +1,6 @@
-function [S, Scale, Smag, Sphase] = syn_headphonenoise_fft(duration, Fs, low, high, usitd, caldata, Smag, Sphase)
+function [S, RMSval, Smag, Sphase] = syn_headphonenoise_fft(duration, Fs, low, high, usitd, caldata, Smag, Sphase)
 %-------------------------------------------------------------------------
-% [S, Scale, Smag, Sphase]  = syn_headphonenoise_fft(duration, Fs, low,
+% [S, RMSval, Smag, Sphase]  = syn_headphonenoise_fft(duration, Fs, low,
 %												high, usitd, caldata, Smag, Sphase)
 %-------------------------------------------------------------------------
 %	Audio Toolbox: Synthesis
@@ -46,14 +46,12 @@ function [S, Scale, Smag, Sphase] = syn_headphonenoise_fft(duration, Fs, low, hi
 % Output Arguments:
 %	S			[2XN] array for stereo stimulus
 %						L channel is row 1, R channel is row 2
-%	Scale		rms scale factor in the form [lscale rscale]
+%	RMSval	rms scale factor in the form [lscale rscale]
 %	Smag		FFT magnitudes
 %	Sphase	FFT phases
 %
 %-------------------------------------------------------------------------
 % See Also: syn_headphone_noise, syn_headphone_tone, figure_headphone_atten
-%-------------------------------------------------------------------------
-%	Audio Toolbox
 %-------------------------------------------------------------------------
 
 %-------------------------------------------------------------------------
@@ -96,41 +94,61 @@ function [S, Scale, Smag, Sphase] = syn_headphonenoise_fft(duration, Fs, low, hi
 % 		-	still need to fix some other components/functions, but this
 % 			should take care of the scaling factor/stimulus length
 % 			issues that have been resulting in clipping
-%-----------------------------------------------------------------------------
+%
+%	21 Feb, 2013 (SJS):
+%		Scaling???? again??? fuck.
+%-------------------------------------------------------------------------
 
+%---------------------------------------------------------------
 % compute # of samples in stim
+%---------------------------------------------------------------
 stimlen = ms2bin(duration, Fs);
-
-% for speed's sake, get the nearest power of 2 to the desired output length
+%---------------------------------------------------------------
+% for speed's sake, get the nearest power of 2 to the 
+% desired output length
+%---------------------------------------------------------------
 NFFT = 2.^(nextpow2(stimlen));
+%---------------------------------------------------------------
 % length of real part of FFT
+%---------------------------------------------------------------
 fftbins = 1+floor(NFFT/2);
 
+%---------------------------------------------------------------
 % generate the frequency bounds for the FFT
-% this saves us from having to use a for loop to assign the values
+% this saves us from having to use a slow 
+% for loop to assign the values
+%---------------------------------------------------------------
+% frequency stepsize
 fstep = Fs/(NFFT);
+% start bin (in frequency vector) for low-frequency cutoff
 f_start_bin = round(low/fstep) + 1;
+% end bin for high-frequency cutoff
 f_end_bin = round(high/fstep) + 1;
+% vector of bin indices for start and end
 f_bins = f_start_bin:f_end_bin;
+% frequencies for start and end
 fft_freqs = fstep*f_bins;
+% # of bins for non-zero portion of FFT
 freqbins = length(fft_freqs);
 
-% compute the phases
+%---------------------------------------------------------------
+% compute the random phases
+%---------------------------------------------------------------
 rand_phases = pi * limited_uniform(1, freqbins);
 itd_phases = (usitd/1e6) * 2 * pi * fft_freqs;
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Check is Smag and Sphase are specified
+%---------------------------------------------------------------
+% Check if Smag and Sphase are specified
 % if not, synthesize noise de novo, otherwise use the provided Smag and
 % Sphase to synthesize the noise
+%
 % (added 16 Nov 2009 for frozen noise synthesis)
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%---------------------------------------------------------------
 if ~(exist('Smag', 'var') && exist('Sphase', 'var'))
 	% initialize and assign values to the FFT arrays
 	Smag = zeros(2, fftbins);
 	Sphase = Smag;
-
-	% check is caldata is a structure.  if so, get the calibration data.  if
+	% check if caldata is a structure.  if so, get the calibration data.  if
 	% not, assume a flat calibration function
 	if isstruct(caldata)
 		% get the calibration magnitudes and phases
@@ -140,57 +158,134 @@ if ~(exist('Smag', 'var') && exist('Sphase', 'var'))
 		phases = 0*mags;
 	end
 
-	% Build the magnitude array for the fft of the signal (Smag) and
-	% scale by 1/frequency_stepsize in order to preserve Parseval's theorem
-	% first, build the full FFT array, S in Matlab format
-	% Scale the FFT magnitude by 0.5 * (Length of Smag)
-	% scale_f =  0.5 * fftbins * caldata.DAscale / fstep;
-	% scale_f = 0.5*Fs/(fstep*NFFT); pre 25June
-	% 24 Jun 09
-	% scale_f = (0.5*NFFT)/(fstep);
-
-	%*******
-	% 23 Aug 2010 (SJS)
-	%*******
-
-	% most recent scale factor (20Feb2013)
-	   scale_f = caldata.DAscale * 0.5 * sqrt(NFFT) * (1/sqrt(2));
-	%%%%%%
+	%*****************************************************************
+	% get the scaling factor for the FFT (pre ifft)
+	% 21 Feb 2013 (SJS): created function to streamline testing this
+	%*****************************************************************
+	scale_f = fftscalef(stimlen, NFFT, Fs, fstep, freqbins, caldata);
 	
-	%%%
-	% old (distributed Penalab?) version (added in caldata.DAscale)
-	%%%%
-% 	scale_f = caldata.DAscale * (0.5*NFFT)/(fstep);
-	
+	% scale the FFT magnitudes over the non-zero portion of the spectrum
 	Smag(1, f_start_bin:f_end_bin) = scale_f * mags(1, :);
 	Smag(2, f_start_bin:f_end_bin) = scale_f * mags(2, :);
 
 	% assign phases for left and right channels & apply the itd phase
 	Sphase(1, f_start_bin:f_end_bin) = rand_phases(1, :) + phases(1, :);
 	Sphase(2, f_start_bin:f_end_bin) = rand_phases(1, :) + phases(2, :) + itd_phases;
+	
 else
-	% need to adjust Sphase(R, :) to generate proper ITD
+	% if Smag and Sphase were provided, we need to adjust the provided 
+	% Sphase(R, :) to generate proper ITD
 	Sphase(2, f_start_bin:f_end_bin) = Sphase(2, f_start_bin:f_end_bin) + itd_phases;
 end
 
+%---------------------------------------------------------------
 % Sreduced is the complex form of the spectrum
+%---------------------------------------------------------------
 Sreduced = complex(Smag.*cos(Sphase), Smag.*sin(Sphase));
 
+%---------------------------------------------------------------
 % build the total FFT vector
+%---------------------------------------------------------------
 Sfft(1, :) = buildfft(Sreduced(1, :));
 Sfft(2, :) = buildfft(Sreduced(2, :));
 	
+%---------------------------------------------------------------
 % then, iFFT the signal
+%---------------------------------------------------------------
 Sraw_L = real(ifft(Sfft(1, :)));
 Sraw_R = real(ifft(Sfft(2, :)));
 
+%---------------------------------------------------------------
 % keep only points we need
+%---------------------------------------------------------------
 S = [Sraw_L(1:stimlen); Sraw_R(1:stimlen)];
 
-% Compute Scale factor for setting the attenuators (rms of signal)
-% since we have calibration data, dB output will be dbspl(VtoPa*Scale)
-Scale = rms(S')';
+%---------------------------------------------------------------
+% Compute rms factor for setting the attenuators (rms of signal)
+% since we have calibration data, 
+% dB output will be dbspl(VtoPa*RMSval)
+%---------------------------------------------------------------
+RMSval = rms(S')';
 
-% DEBUGGING
-% save mp.mat
-% max(S')
+end	% END syn_headphonenoise_fft
+%-------------------------------------------------------------------------
+%-------------------------------------------------------------------------
+%-------------------------------------------------------------------------
+
+%-------------------------------------------------------------------------
+%-------------------------------------------------------------------------
+%-------------------------------------------------------------------------
+function scale_f = fftscalef(stimlen, NFFT, Fs, fstep, freqbins, caldata)
+%-------------------------------------------------------------------------
+
+% 	scale_f = caldata.DAscale * (1/stimlen) * 0.5; 
+	scale_f = caldata.DAscale * fstep * 2
+	tmp = caldata.DAscale * fstep * (NFFT / stimlen)
+
+	
+	%*****************************************************************
+	% method 1
+	%*****************************************************************
+	% Build the magnitude array for the fft of the signal (Smag) and
+	% scale by 1/frequency_stepsize in order to preserve Parseval's theorem
+	%*****************************************************************
+
+	%*****************************************************************
+	% method 2
+	%*****************************************************************
+	% first, build the full FFT array, S in Matlab format
+	% Scale the FFT magnitude by 0.5 * (Length of Smag)
+	%*****************************************************************
+
+	%*****************************************************************
+	% method 3
+	%*****************************************************************
+	% scale_f =  0.5 * fftbins * caldata.DAscale / fstep;
+	%*****************************************************************
+
+	%*****************************************************************
+	%*****************************************************************
+	% scale_f = 0.5*Fs/(fstep*NFFT); pre 25June
+	%*****************************************************************
+
+	%*****************************************************************
+	%*****************************************************************
+	% 24 Jun 09
+	%*****************************************************************
+	% scale_f = (0.5*NFFT)/(fstep);
+	%*****************************************************************
+
+	%*****************************************************************
+	%*****************************************************************
+	% 23 Aug 2010 (SJS)
+	%*****************************************************************
+	% most recent scale factor (20Feb2013)
+% 		scale_f = caldata.DAscale * 0.5 * sqrt(NFFT) * (1/sqrt(2));
+	%*****************************************************************
+	
+	%*****************************************************************
+	%*****************************************************************
+	% old (distributed Penalab?) version (added in caldata.DAscale)
+	%*****************************************************************
+% 	scale_f = caldata.DAscale * (0.5*NFFT)/(fstep);
+	
+	%*****************************************************************
+	%*****************************************************************
+	% 21 Feb 2013 (SJS)
+	% Parseval preserving????
+	%*****************************************************************
+% 		scale_f = caldata.DAscale * 2 *  fstep
+	%*****************************************************************
+	%*****************************************************************
+
+	%*****************************************************************
+	%*****************************************************************
+	% 21 Feb 2013 (SJS)
+	%*****************************************************************
+% 	scale_f = caldata.DAscale * 0.5 * sqrt(NFFT) * (1/sqrt(2));
+	%*****************************************************************
+
+end	% END fftscalef
+%-------------------------------------------------------------------------
+%-------------------------------------------------------------------------
+%-------------------------------------------------------------------------

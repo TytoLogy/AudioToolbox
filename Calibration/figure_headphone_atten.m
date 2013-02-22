@@ -56,6 +56,7 @@ end
 if spl_val(1) == 0
 	atten_val(1) = MAXATTEN;
 else
+	%!!!!!!! should db() call be to dbspl() instead?????
 	atten_val(1) = caldata.mindbspl(1) + db(rms_val(1)) - spl_val(1);
 end
 
