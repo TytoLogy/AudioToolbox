@@ -1,5 +1,5 @@
-function [S, Smag, Sphi] = fftdbplot(s, Fs, f)
-% [S, Smag, Sphi] = fftplot(s, Fs, f)
+function [S, Smag, Sphi, F] = fftdbplot(s, Fs, f)
+% [S, Smag, Sphi, F] = fftplot(s, Fs, f)
 %
 %  plots the signal, FFT magnitude, and FFT phase
 %
@@ -14,7 +14,7 @@ function [S, Smag, Sphi] = fftdbplot(s, Fs, f)
 %		S		= full FFT
 %		Smag	= FFT magnitude
 %		Sphi	= FFT phase (in unwrapped degrees)
-%
+%		F		= freq vector
 %	See Also: fftplot
 
 %
@@ -92,9 +92,9 @@ ylabel('FFT Magnitude (dB)'); xlabel('Frequency')
 subplot(3, 1, 3), plot(F, rad2deg(unwrap(Sphase)));
 ylabel('FFT Phase (deg)'); xlabel('Frequency')
 
-if nargout == 2
-	Smag = Sreal;
-elseif nargout == 3
-	Smag = Sreal;
+% if nargout == 2
+	Smag = db(Sreal);
+% elseif nargout == 3
+% 	Smag = Sreal;
 	Sphi = rad2deg(unwrap(Sphase));
-end
+% end
