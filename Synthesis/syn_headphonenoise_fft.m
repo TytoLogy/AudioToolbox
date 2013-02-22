@@ -152,7 +152,16 @@ if ~(exist('Smag', 'var') && exist('Sphase', 'var'))
 	%*******
 	% 23 Aug 2010 (SJS)
 	%*******
-    scale_f = caldata.DAscale * 0.5 * sqrt(NFFT) * (1/sqrt(2));
+
+	% most recent scale factor (20Feb2013)
+	   scale_f = caldata.DAscale * 0.5 * sqrt(NFFT) * (1/sqrt(2));
+	%%%%%%
+	
+	%%%
+	% old (distributed Penalab?) version (added in caldata.DAscale)
+	%%%%
+% 	scale_f = caldata.DAscale * (0.5*NFFT)/(fstep);
+	
 	Smag(1, f_start_bin:f_end_bin) = scale_f * mags(1, :);
 	Smag(2, f_start_bin:f_end_bin) = scale_f * mags(2, :);
 
