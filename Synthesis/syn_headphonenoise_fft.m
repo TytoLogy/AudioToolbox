@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 function [S, Scale, Smag, Sphase] = syn_headphonenoise_fft(duration, Fs, low, high, usitd, caldata, Smag, Sphase)
 %-------------------------------------------------------------------------
 % [S, Scale, Smag, Sphase]  = syn_headphonenoise_fft(duration, Fs, low,
@@ -188,7 +187,15 @@ Scale = rms(S')';
 
 % DEBUGGING
 % save mp.mat
-=======
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%{
+IN PROGRESSS
+
 function [S, Scale, Smag, Sphase] = syn_headphonenoise_fft(duration, Fs, low, high, usitd, caldata, Smag, Sphase)
 %-------------------------------------------------------------------------
 % [S, Scale, Smag, Sphase]  = syn_headphonenoise_fft(duration, Fs, low,
@@ -326,9 +333,11 @@ if ~(exist('Smag', 'var') && exist('Sphase', 'var'))
 	if isstruct(caldata)
 		% get the calibration magnitudes and phases
 		[mags, phases] = figure_cal(fft_freqs, caldata);
+		DAscale = caldata.DAscale;
 	else
 		mags = ones(2, freqbins);
 		phases = 0*mags;
+		DAscale = 1;
 	end
 
 	% Build the magnitude array for the fft of the signal (Smag) and
@@ -345,7 +354,7 @@ if ~(exist('Smag', 'var') && exist('Sphase', 'var'))
 	%*******
 
 	% most recent scale factor (20Feb2013)
-	   scale_f = caldata.DAscale * 0.5 * sqrt(NFFT) * (1/sqrt(2));
+	   scale_f = DAscale * 0.5 * sqrt(NFFT) * (1/sqrt(2));
 	%%%%%%
 	
 	%%%
@@ -384,5 +393,6 @@ Scale = rms(S')';
 
 % DEBUGGING
 % save mp.mat
->>>>>>> many changes, not sure if working.
 % max(S')
+
+%}
