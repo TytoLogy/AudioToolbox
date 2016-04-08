@@ -1,5 +1,5 @@
-function [S, Smag, Sphi] = fftdbplot(s, Fs, f)
-% [S, Smag, Sphi] = fftplot(s, Fs, f)
+function varargout = fftdbplot(s, Fs, f)
+% [S, Smag, Sphi, F] = fftplot(s, Fs, f)
 %
 %  plots the signal, FFT magnitude, and FFT phase
 %
@@ -14,12 +14,12 @@ function [S, Smag, Sphi] = fftdbplot(s, Fs, f)
 %		S		= full FFT
 %		Smag	= FFT magnitude
 %		Sphi	= FFT phase (in unwrapped degrees)
-%
+%		F		= frequency vector for Smag, Sphi
 %	See Also: fftplot
 
 %
 % Sharad Shanbhag
-% sshanbha@aecom.yu.edu
+% sshanbhag@neomed.edu
 
 if nargin < 2
 	error('fftdbplot: must specify Fs');
@@ -92,9 +92,15 @@ ylabel('FFT Magnitude (dB)'); xlabel('Frequency')
 subplot(3, 1, 3), plot(F, rad2deg(unwrap(Sphase)));
 ylabel('FFT Phase (deg)'); xlabel('Frequency')
 
-if nargout == 2
-	Smag = Sreal;
-elseif nargout == 3
-	Smag = Sreal;
-	Sphi = rad2deg(unwrap(Sphase));
+if nargout 
+	varargout{1} = S;
+end
+if nargout >= 2
+	varargout{2} = Sreal;
+end
+if nargout >= 3
+	varargout{3} = rad2deg(unwrap(Sphase));
+end
+if nargout == 4
+	varargout{4} = F;
 end

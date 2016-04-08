@@ -16,7 +16,8 @@ function [S, Smag, Sphase, oStr]  = synmononoise_fft(duration, Fs, low, high, sc
 % 	high			high frequency cutoff
 %	scale			rms scale factor.  
 %	caldata		caldata structure (caldata.mag, caldata.freq, caldata.phase)
-%					***if no calibration is desired, replace caldata with value 0
+%					***if no calibration is desired, replace 
+%						caldata with value 0
 %
 % Output arguments:
 %	S				[1XN] array, where N = 0.001*dur*Fs
@@ -64,6 +65,8 @@ if (low <= 0) || (high <= 0)
 end
 if high > Fs / 2
 	warning('synmononoise_fft: high is greater than Nyquist freq (Fs/2)');
+	high = floor(Fs/2);
+	fprintf('\tUsing highest possible frequency (%d Hz)\n', high);
 end
 
 CAL = 0;
@@ -72,10 +75,10 @@ if isstruct(caldata)
 end
 
 % convert duration to seconds, compute # of samples in stim
-stimlen = ceil(ms2bin(duration, Fs));
+stimsamples = ceil(ms2bin(duration, Fs));
 
 % for speed's sake, get the nearest power of 2 to the desired output length
-NFFT = 2.^(nextpow2(stimlen));
+NFFT = 2.^(nextpow2(stimsamples));
 
 % initialize and assign values to the FFT arrays
 fftbins = 1+floor(NFFT/2);
@@ -83,7 +86,7 @@ Smag = zeros(1, fftbins);
 Sphase = Smag;
 
 if scale == 0
-	S = zeros(1, stimlen);
+	S = zeros(1, stimsamples);
 	return
 end
 
@@ -104,7 +107,10 @@ rand_phases = pi * limited_uniform(1, freqbins);
 
 % get the calibration magnitudes and phases
 if CAL
-	[mags(1, :), phases(1, :)] = get_cal(fft_freqs, caldata.freq(1, :), caldata.maginv(1, :), caldata.phase(1, :));
+	[mags(1, :), phases(1, :)] = get_cal(fft_freqs, ...
+														caldata.freq(1, :), ...
+														caldata.maginv(1, :), ...
+														caldata.phase(1, :));
 else
 	mags = (1/freqbins)*ones(1, freqbins);	% mags = 1 for uncalibrated data
 	phases = zeros(1, freqbins);		% phases = random for uncalibrated data
@@ -132,13 +138,11 @@ Sraw = ifft(Sfull, NFFT);
 if CAL
 	scale_f = caldata.DAscale * 0.5 * sqrt(NFFT) * (1/sqrt(2));
 else
-	scale_f = 0.5 * sqrt(NFFT) * (1/sqrt(2));
+	scale_f = 0.25 * sqrt(NFFT) * (1/sqrt(2));
 end
 
 % cut out the stimulus from raw vector
-S = scale_f *real(Sraw(1:stimlen));
-
-max(imag(Sraw))
+S = stimsamples * scale_f *real(Sraw(1:stimsamples));
 
 if nargout == 4
 	oStr = sprintf('scale: %.2f \t max: %.4f \t rms: %.4f \t dB: %.4f',...

@@ -7,12 +7,26 @@ function caldata  = fake_caldata(varargin)
 % 
 %------------------------------------------------------------------------
 % Input Arguments:
+% 	<none>		use defaults
+% 					20 to 20000 Hz in 100 Hz steps
+% 					Fs = 44100;
+% 					DAscale = 1;
+% 					calshape = 'flat'
+% 	
+% 	'Fs', <value>			Sample rate (samples/sec)
+% 	
+% 	'calshape',	<name>	profile of calibration curve
+% 					'flat'		flat profile
+% 					'peak'		peak in middle of frequency range
+% 					'notch'		notch in middle of frequency range		
+% 					'rolloff'	rolls off as function of frequency
+% 
+% 	'freqs'					List of frequencies for data
 % 
 % Output Arguments:
 % 	caldata		caldata struct
 %
 %------------------------------------------------------------------------
-%
 % See Also: load_headphone_cal
 %--------------------------------------------------------------------------
 
@@ -26,16 +40,20 @@ function caldata  = fake_caldata(varargin)
 %	1 Oct 2012 (SJS):
 %	 -	updated comments format
 %	 - implemented varargin for user control of caldata parameters
+%	8 Apr 2016 (SJS):
+%	 - added features to generate testing caldata values
 %--------------------------------------------------------------------------
 
 
 % some defaults
-MINFREQ = 20;
-MAXFREQ = 20000;
-FREQSTEP = 100;
-freqs = (MINFREQ:FREQSTEP:MAXFREQ);
-FS =  4.8828e+004;
-DASCALE = 5;
+minfreq = 20;
+maxfreq = 20000;
+freqstep = 100;
+freqs = (minfreq:freqstep:maxfreq);
+Fs =  44100;
+DAscale = 1;
+calshape = 'flat';
+
 
 % loop through # variable input args
 nvararg = length(varargin);
@@ -44,6 +62,20 @@ if nvararg
 	while aindex < nvararg
 		switch(upper(varargin{aindex}))
 			
+			% set Fs
+			case 'Fs'
+				if isnumeric(varargin{aindex+1})
+					Fs = varargin{aindex+1};
+					aindex = aindex + 2;
+				else
+					error('%s: bad Fs value', mfilename);
+				end
+				
+			% set calshape (shape of calibration data)
+			case 'CALSHAPE'
+				calshape = varargin{aindex+1};
+				aindex = aindex + 2;				
+
 			% set freqs 
 			case 'FREQS'
 				if isnumeric(varargin{aindex+1})
@@ -53,13 +85,13 @@ if nvararg
 					error('%s: bad freqs vector', mfilename);
 				end
 				
-			% set DASCALE
+			% set DAscale
 			case 'DASCALE'
 				if isnumeric(varargin{aindex+1})
-					DASCALE = varargin{aindex+1};
+					DAscale = varargin{aindex+1};
 					aindex = aindex + 2;
 				else
-					error('%s: bad DASCALE (%s)', mfilename, varargin{aindex+1});
+					error('%s: bad DAscale (%s)', mfilename, varargin{aindex+1});
 				end
 				
 			% trap unknown input command
@@ -76,8 +108,8 @@ zeroarray = zeros(2, nfreqs);
 
 caldata.time_str = [date ' ' time];
 caldata.timestamp = now;
-caldata.adFc =  FS;
-caldata.daFc =  FS;
+caldata.adFc =  Fs;
+caldata.daFc =  Fs;
 caldata.nrasters = nfreqs;
 caldata.range = [min(freqs) (freqs(2) - freqs(1)) max(freqs)];
 caldata.reps = 2;
@@ -93,7 +125,7 @@ caldata.phase =  zeroarray;
 caldata.dist =  zeroarray;
 caldata.mag_stderr =  zeroarray;
 caldata.phase_stderr =  zeroarray;
-caldata.DAscale = DASCALE;
+caldata.DAscale = DAscale;
 caldata.dist_stderr =  zeroarray;
 caldata.leakmag =  zeroarray;
 caldata.leakmag_stderr =  zeroarray;
@@ -109,9 +141,10 @@ caldata.phisdbug = [];
 caldata.maginv = onearray;
 caldata.phase_us = caldata.phase;
 % preconvert phases from angle (RADIANS) to microsecond
-caldata.phase_us(1, :) = (1.0e6 * unwrap(caldata.phase(1, :))) ./ (2 * pi * caldata.freq);
-caldata.phase_us(2, :) = (1.0e6 * unwrap(caldata.phase(2, :))) ./ (2 * pi * caldata.freq);
-
+caldata.phase_us(1, :) = (1.0e6 * unwrap(caldata.phase(1, :))) ...
+										./ (2 * pi * caldata.freq);
+caldata.phase_us(2, :) = (1.0e6 * unwrap(caldata.phase(2, :))) ...
+										./ (2 * pi * caldata.freq);
 caldata.mindbspl = [80 80];
 caldata.maxdbspl = [100 100];
 
