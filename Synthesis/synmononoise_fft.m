@@ -48,7 +48,9 @@ function [S, Smag, Sphase, oStr]  = synmononoise_fft(duration, Fs, low, high, sc
 %	11 March, 2010 (SJS): updated comments
 %--------------------------------------------------------------------------
 
+%--------------------------------------------------------------------------
 % do some basic checks on the input arguments
+%--------------------------------------------------------------------------
 if nargin ~= 6
 	help synmononoise_fft;
 	error('synmononoise_fft: incorrect number of input arguments');
@@ -74,75 +76,107 @@ if isstruct(caldata)
 	CAL = 1;
 end
 
+%--------------------------------------------------------------------------
 % convert duration to seconds, compute # of samples in stim
+%--------------------------------------------------------------------------
 stimsamples = ceil(ms2bin(duration, Fs));
 
-% for speed's sake, get the nearest power of 2 to the desired output length
-NFFT = 2.^(nextpow2(stimsamples));
-
-% initialize and assign values to the FFT arrays
-fftbins = 1+floor(NFFT/2);
-Smag = zeros(1, fftbins);
-Sphase = Smag;
-
+%--------------------------------------------------------------------------
+% forget going ahead if scale is 0
+%--------------------------------------------------------------------------
 if scale == 0
 	S = zeros(1, stimsamples);
 	return
 end
 
+%--------------------------------------------------------------------------
+% for speed's sake, get the nearest power of 2 to the desired output length
+%--------------------------------------------------------------------------
+NFFT = 2.^(nextpow2(stimsamples));
+
+%--------------------------------------------------------------------------
+% initialize and assign values to the FFT arrays
+%--------------------------------------------------------------------------
+% # of bins for the 1 sided FFT magnitude and phase vectors (Smag, Sphase)
+% add 1 bin for DC component (1st bin) and reduce by factor of 2 since
+% Matlab will want a 2-sided FFT for inverse (which will be built by the 
+% call to buildfft later on)
+fftbins = 1+floor(NFFT/2);
+% allocate FFT arrays
+Smag = zeros(1, fftbins);
+Sphase = Smag;
+
+%--------------------------------------------------------------------------
 % generate the frequency bounds for the FFT
 % this saves us from having to use a for loop to 
 % assign the values
+%
+% 	fstep		frequency steps between each point in freq vector
+% 	fft_freqs	list of frequencies for magnitude data
+% 	freqbins	# of frequencies with non-zero magnitude
+%--------------------------------------------------------------------------
 fstep = Fs/(NFFT);
 f_start_bin = round(low/fstep) + 1;
 f_end_bin = round(high/fstep) + 1;
-% f_start_bin = round(caldata./fstep) + 1;
-% f_end_bin = floor(caldata.freq(end)/fstep);
 f_bins = f_start_bin:f_end_bin;
 fft_freqs = fstep*f_bins;
 freqbins = length(fft_freqs);
 
-% generate the random phases (for noise)
-rand_phases = pi * limited_uniform(1, freqbins);
-
+%--------------------------------------------------------------------------
 % get the calibration magnitudes and phases
+%--------------------------------------------------------------------------
 if CAL
+	% use the calibration information (get_cal will perform the
+	% required interpolation)
 	[mags(1, :), phases(1, :)] = get_cal(fft_freqs, ...
 														caldata.freq(1, :), ...
 														caldata.maginv(1, :), ...
 														caldata.phase(1, :));
 else
-	mags = (1/freqbins)*ones(1, freqbins);	% mags = 1 for uncalibrated data
-	phases = zeros(1, freqbins);		% phases = random for uncalibrated data
+	% generate flat spectrum
+	% mags = 0.7071
+	% phases = random for uncalibrated data (will be added later)
+	mags = (sqrt(2)/2) * ones(1, freqbins);
+	phases = zeros(1, freqbins);
 end
 
+%--------------------------------------------------------------------------
 % Build the magnitude array for the fft of the signal (Smag) and
 % scale by 1/frequency_stepsize in order to preserve Parseval's theorem
+%--------------------------------------------------------------------------
 Smag(1, f_bins) = mags(1, :);
 	
-% assign phases 
-Sphase(1, f_bins) = rand_phases(1, :) + phases(1, :);
+%--------------------------------------------------------------------------
+% generate the random phases (for noise), add compensatory phase shifts 
+%--------------------------------------------------------------------------
+Sphase(1, f_bins) = pi * limited_uniform(1, freqbins) + phases(1, :);
 
+%--------------------------------------------------------------------------
 % build the full FFT arrays
+%--------------------------------------------------------------------------
 Sred = complex(Smag.*cos(Sphase), Smag.*sin(Sphase));
 Sfull = buildfft(Sred(1, :));
 
-%generate the ifft
+%--------------------------------------------------------------------------
+% generate the ifft
+%--------------------------------------------------------------------------
 Sraw = ifft(Sfull, NFFT);
 
+%--------------------------------------------------------------------------
 % compute the scale factor
-% scale_f = 0.5 * Fs * scale / fstep;
-%*******
-% 23 Aug 2010 (SJS)
-%*******
+%--------------------------------------------------------------------------
 if CAL
-	scale_f = caldata.DAscale * 0.5 * sqrt(NFFT) * (1/sqrt(2));
+	scale_f = scale * caldata.DAscale * sqrt(freqbins);
 else
-	scale_f = 0.25 * sqrt(NFFT) * (1/sqrt(2));
+	scale_f = scale * sqrt(freqbins);
 end
 
+%--------------------------------------------------------------------------
 % cut out the stimulus from raw vector
-S = stimsamples * scale_f *real(Sraw(1:stimsamples));
+%--------------------------------------------------------------------------
+% S = stimsamples * scale_f *real(Sraw(1:stimsamples));
+S = scale_f *real(Sraw(1:stimsamples));
+
 
 if nargout == 4
 	oStr = sprintf('scale: %.2f \t max: %.4f \t rms: %.4f \t dB: %.4f',...

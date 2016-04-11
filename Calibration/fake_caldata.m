@@ -21,8 +21,10 @@ function caldata  = fake_caldata(varargin)
 % 					'notch'		notch in middle of frequency range		
 % 					'rolloff'	rolls off as function of frequency
 % 
-% 	'freqs'					List of frequencies for data
+% 	'freqs', <array>		List of frequencies for data
 % 
+%	'DAscale', <value>	scaling factor for output
+%
 % Output Arguments:
 % 	caldata		caldata struct
 %
@@ -45,7 +47,9 @@ function caldata  = fake_caldata(varargin)
 %--------------------------------------------------------------------------
 
 
+%--------------------------------------------------------------------------
 % some defaults
+%--------------------------------------------------------------------------
 minfreq = 20;
 maxfreq = 20000;
 freqstep = 100;
@@ -54,6 +58,9 @@ Fs =  44100;
 DAscale = 1;
 calshape = 'flat';
 
+%--------------------------------------------------------------------------
+% Parse Input Arguments
+%--------------------------------------------------------------------------
 
 % loop through # variable input args
 nvararg = length(varargin);
@@ -148,3 +155,53 @@ caldata.phase_us(2, :) = (1.0e6 * unwrap(caldata.phase(2, :))) ...
 caldata.mindbspl = [80 80];
 caldata.maxdbspl = [100 100];
 
+switch upper(calshape)
+	
+	case 'FLAT'
+		return
+		
+	case 'PEAK'
+		% modulate mags by a gaussian peak
+		if mod(length(freqs), 2)
+			nfreqs = length(freqs) + 1;
+		else
+			nfreqs = length(freqs);
+		end
+		xmin = -1;
+		xmax = 1;
+		x = xmin:( (xmax-xmin)/nfreqs):xmax;
+		y = 0.9 * exp(-(x.^2)*10);
+		caldata.mag(1, :) = onearray(1, :) + y(1:length(freqs));
+		caldata.mag(2, :) = caldata.mag(1, :);
+		
+	case 'NOTCH'
+		% modulate mags by gaussian notch
+		if mod(length(freqs), 2)
+			nfreqs = length(freqs) + 1;
+		else
+			nfreqs = length(freqs);
+		end
+		xmin = -1;
+		xmax = 1;
+		x = xmin:( (xmax-xmin)/nfreqs):xmax;
+		y = -0.9 * exp(-(x.^2)*10);
+		caldata.mag(1, :) = onearray(1, :) + y(1:length(freqs));
+		caldata.mag(2, :) = caldata.mag(1, :);
+		
+	case 'ROLLOFF'
+		if mod(length(freqs), 2)
+			nfreqs = length(freqs) + 1;
+		else
+			nfreqs = length(freqs);
+		end
+		xmin = -1;
+		xmax = 1;
+		x = xmin:( (xmax-xmin)/nfreqs):xmax;
+		y = -0.9 * (0.5 * (1 + erf(x*3)));
+		caldata.mag(1, :) = onearray(1, :) + y(1:length(freqs));
+		caldata.mag(2, :) = caldata.mag(1, :);		
+		
+	otherwise
+		fprintf('%s: unknown fake cal profile %s\n', mfilename, calshape);
+		fprintf('\tUsing FLAT profile (default)\n');
+end
