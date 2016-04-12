@@ -1,7 +1,8 @@
 function [S, Smag, Sphase, oStr]  = synmononoise_fft(duration, Fs, low, high, scale, caldata)
-%-------------------------------------------------------------------------
-% [S, Smag, Sphase, oStr]  = synmononoise_fft(duration, Fs, low, high, scale, caldata)
-%-------------------------------------------------------------------------
+%--------------------------------------------------------------------------
+% [S, Smag, Sphase, oStr]  = synmononoise_fft(duration, Fs, low, high, 
+%																scale, caldata)
+%--------------------------------------------------------------------------
 %	Audio Toolbox: Synthesis
 %-------------------------------------------------------------------------
 % 
@@ -136,7 +137,7 @@ else
 	% generate flat spectrum
 	% mags = 0.7071
 	% phases = random for uncalibrated data (will be added later)
-	mags = (sqrt(2)/2) * ones(1, freqbins);
+	mags = ones(1, freqbins);
 	phases = zeros(1, freqbins);
 end
 
@@ -176,7 +177,6 @@ end
 %--------------------------------------------------------------------------
 % S = stimsamples * scale_f *real(Sraw(1:stimsamples));
 S = scale_f *real(Sraw(1:stimsamples));
-
 
 if nargout == 4
 	oStr = sprintf('scale: %.2f \t max: %.4f \t rms: %.4f \t dB: %.4f',...

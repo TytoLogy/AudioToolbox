@@ -127,7 +127,6 @@ caldata.max_spl = 50;
 caldata.min_spl = 40;
 caldata.frfile = [];
 caldata.freq = freqs;
-caldata.mag =  onearray;
 caldata.phase =  zeroarray;
 caldata.dist =  zeroarray;
 caldata.mag_stderr =  zeroarray;
@@ -158,7 +157,8 @@ caldata.maxdbspl = [100 100];
 switch upper(calshape)
 	
 	case 'FLAT'
-		return
+		% flat
+		caldata.mag =  onearray;
 		
 	case 'PEAK'
 		% modulate mags by a gaussian peak
@@ -204,4 +204,21 @@ switch upper(calshape)
 	otherwise
 		fprintf('%s: unknown fake cal profile %s\n', mfilename, calshape);
 		fprintf('\tUsing FLAT profile (default)\n');
+		caldata.mag =  onearray;
 end
+
+% mags need to be in dB SPL
+caldata.mag = dbspl(caldata.mag);
+
+% get the overall min and max dB SPL levels
+caldata.mindbspl = min(caldata.mag'); %#ok<*UDIM>
+caldata.maxdbspl = max(caldata.mag');
+
+% subtract SPL mags (at each freq) from the min dB recorded for each
+% channel and convert back to Pa (rms)
+caldata.maginv(1, :) = invdb(caldata.mindbspl(1) - caldata.mag(1, :));
+caldata.maginv(2, :) = invdb(caldata.mindbspl(2) - caldata.mag(2, :));
+
+
+
+

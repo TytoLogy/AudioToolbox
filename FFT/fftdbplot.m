@@ -1,7 +1,11 @@
 function varargout = fftdbplot(s, Fs, f)
+%--------------------------------------------------------------------------
 % [S, Smag, Sphi, F] = fftplot(s, Fs, f)
-%
+%--------------------------------------------------------------------------
+%	Audio Toolbox: FFT
+%-------------------------------------------------------------------------
 %  plots the signal, FFT magnitude, and FFT phase
+%-------------------------------------------------------------------------
 %
 %	Input:
 %		s		= signal vector
@@ -15,12 +19,24 @@ function varargout = fftdbplot(s, Fs, f)
 %		Smag	= FFT magnitude
 %		Sphi	= FFT phase (in unwrapped degrees)
 %		F		= frequency vector for Smag, Sphi
+%-------------------------------------------------------------------------
 %	See Also: fftplot
+%--------------------------------------------------------------------------
 
+%--------------------------------------------------------------------------
+%  Sharad Shanbhag
+%	sshanbhag@neomed.edu
+%-------------------------------------------------------------------------
+% Created: ?????
 %
-% Sharad Shanbhag
-% sshanbhag@neomed.edu
+% Revisions:
+%	12 Apr 2016, SJS:
+%	 Cleaning up, tidying, modifying
+%--------------------------------------------------------------------------
 
+%------------------------------------------------------------------------
+% Check Inputs
+%------------------------------------------------------------------------
 if nargin < 2
 	error('fftdbplot: must specify Fs');
 end
@@ -36,51 +52,33 @@ end
 
 varname = inputname(1);
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% OLD ALGORITHM
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% % now compute the FFT with NFFT points
-% NFFT = 2^nextpow2(N);
-% S = fft(s, NFFT);
-% 
-% %non-redundant points are kept
-% Nunique = ceil((NFFT+1)/2);
-% Sunique = S(1:Nunique);
-% Sreal = abs(Sunique).*(2/N);
-% Sphase = angle(Sunique);
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%------------------------------------------------------------------------
 % now compute the FFT with NFFT points
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+%------------------------------------------------------------------------
 N = length(s);
 
 % go to next power of 2 for speed's sake
 NFFT = 2.^(nextpow2(N));
 % run the FFT
-S = fft(s, NFFT)/N;
+S = fft(s, NFFT);
 
 %non-redundant points are kept
-Nunique = NFFT/2;
+Nunique = NFFT/2 + 1;
 Sunique = S(1:Nunique);
 
 % get the magnitudes of the FFT scale by 2 because we're taking only
 % half of the points from the "full" FFT vector S;
-Sreal = 2*abs(Sunique); 
+Sreal = abs(Sunique)/N; 
+Sreal(2:end) = 2*Sreal(2:end);
 Sphase = angle(Sunique);
 
 % This is an evenly spaced frequency vector with Nunique points.
 % scaled by the Nyquist frequency (Fn ==1/2 sample freq.)
 F = Fs/2*linspace(0,1,NFFT/2);
 
-%non-redundant points are kept
-Nunique = NFFT/2;
-Sunique = S(1:Nunique);
-Sreal = 2*abs(Sunique);
-Sphase = angle(Sunique);
 
 % generate time vector
-time = ([1:N] - 1) / Fs;
+time = ((1:N) - 1) / Fs;
 
 subplot(3, 1, 1), plot(time, s);
 ylabel('Input Signal'); xlabel('time(s)')
