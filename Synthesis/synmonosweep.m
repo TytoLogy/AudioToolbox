@@ -47,9 +47,9 @@ end
 if (fmax > (Fs / 2))
 	error('%s: freq is greater than Nyquist freq (Fs/2, %f)', mfilename, Fs/2);
 end
-if (fmax <= fmin)
-	error('%s: fmax <= fmin!!!', mfilename);
-end
+% if (fmax <= fmin)
+% 	error('%s: fmax <= fmin!!!', mfilename);
+% end
 CAL = 0;
 if isstruct(caldata)
 	CAL = 1;
