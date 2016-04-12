@@ -96,6 +96,7 @@ function [S, Scale, Smag, Sphase] = syn_headphonenoise_fft(duration, Fs, low, hi
 % 		-	still need to fix some other components/functions, but this
 % 			should take care of the scaling factor/stimulus length
 % 			issues that have been resulting in clipping
+%	30 Jan 2013 (SJS): fixed DAscale error if caldata is provided as 0
 %-----------------------------------------------------------------------------
 
 % compute # of samples in stim
@@ -135,9 +136,11 @@ if ~(exist('Smag', 'var') && exist('Sphase', 'var'))
 	if isstruct(caldata)
 		% get the calibration magnitudes and phases
 		[mags, phases] = figure_cal(fft_freqs, caldata);
+		DAscale = caldata.DAscale;
 	else
 		mags = ones(2, freqbins);
 		phases = 0*mags;
+		DAscale = 1;
 	end
 
 	% Build the magnitude array for the fft of the signal (Smag) and
@@ -152,7 +155,7 @@ if ~(exist('Smag', 'var') && exist('Sphase', 'var'))
 	%*******
 	% 23 Aug 2010 (SJS)
 	%*******
-	scale_f = caldata.DAscale * 0.5 * sqrt(NFFT) * (1/sqrt(2));
+	scale_f = DAscale * 0.5 * sqrt(NFFT) * (1/sqrt(2));
 	Smag(1, f_start_bin:f_end_bin) = scale_f * mags(1, :);
 	Smag(2, f_start_bin:f_end_bin) = scale_f * mags(2, :);
 
