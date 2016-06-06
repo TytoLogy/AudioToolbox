@@ -57,9 +57,11 @@ caldata.phase_us = caldata.phase; %#ok<NODEF>
 if isfield(caldata, 'freq')
 	caldata.phase_us(1, :) = (1.0e6 * unwrap(caldata.phase(1, :))) ./ (2 * pi * caldata.freq);
 	caldata.phase_us(2, :) = (1.0e6 * unwrap(caldata.phase(2, :))) ./ (2 * pi * caldata.freq);
+	caldata.Freqs = caldata.freq;
 elseif isfield(caldata, 'Freqs')
 	caldata.phase_us(1, :) = (1.0e6 * unwrap(caldata.phase(1, :))) ./ (2 * pi * caldata.Freqs);
 	caldata.phase_us(2, :) = (1.0e6 * unwrap(caldata.phase(2, :))) ./ (2 * pi * caldata.Freqs);
+	caldata.freq = caldata.Freqs;
 else
 	error('%s: no freq or Freqs in caldata????', mfilename)
 end
@@ -89,6 +91,8 @@ elseif isfield(caldata, 'frdata')
 	else
 		caldata.DAscale = 1;
 	end	
+elseif isfield(caldata, 'DAlevel')
+	caldata.DAscale = caldata.DAlevel;
 else
 	caldata.DAscale = 1;
 end

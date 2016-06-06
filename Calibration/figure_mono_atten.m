@@ -37,5 +37,7 @@ atten_val = zeros(size(spl_val));
 for n = 1:nvals
 	atten_val(n) = caldata.mindbspl(n) + db(rms_val(n)) - spl_val(n);
 end
+% set values < 0 to 0
+atten_val(atten_val<0) = 0;
 
 
