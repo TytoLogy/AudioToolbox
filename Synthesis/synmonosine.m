@@ -26,13 +26,14 @@ function [S, Smag, Sphi]  = synmonosine(duration, Fs, freq, scale, caldata)
 
 %--------------------------------------------------------------------------
 % Sharad J. Shanbhag
-% sharad.shanbhag@einstein.yu.edu
+% sshanbhag@neomed.edu
 % 	Code adapted from XDPHYS synth library developed by
 % 	Jamie Mazer and Ben Arthur
 %--------------------------------------------------------------------------
 % Created: 4 January, 2008 (SJS) from synmononoise_fft
 % Revision History:
 %	11 March, 2010 (SJS): updated comments
+%	7 Jun 2016 (SJS): touch up.
 %--------------------------------------------------------------------------
 
 % do some basic checks on the input arguments
@@ -41,13 +42,13 @@ if nargin ~= 5
 	error('synmonosine: incorrect number of input arguments');
 end
 
-if duration <=0
+if duration <= 0
 	error('synmonosine: duration must be > 0')
 end
 if freq <= 0 
 	error('synmonosine: freq  must be greater than 0');
 end
-if freq > Fs ./ 2
+if freq > Fs / 2
 	warning('synmonosine: freq is greater than Nyquist freq (Fs/2)');
 end
 
@@ -59,7 +60,7 @@ end
 % convert duration to seconds, compute # of samples in stim
 duration = 0.001 * duration;
 dt = 1/Fs;
-tvec = dt*[0:(Fs * duration)-1];
+tvec = dt*(0:(Fs * duration)-1);
 omega = 2 * pi * freq;
 
 % get values for Smag (magnitude) and Sphase (phase), from either the
