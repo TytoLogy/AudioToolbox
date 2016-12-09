@@ -2,6 +2,8 @@ function caldata  = fake_caldata(varargin)
 %------------------------------------------------------------------------
 % caldata  = fake_caldata(varargin)
 %------------------------------------------------------------------------
+% AudioToolbox:Calibration
+%------------------------------------------------------------------------
 %
 % Creates a fake caldata structure with flat response
 % 
@@ -29,7 +31,7 @@ function caldata  = fake_caldata(varargin)
 % 	caldata		caldata struct
 %
 %------------------------------------------------------------------------
-% See Also: load_headphone_cal
+% See Also: load_headphone_cal, fake_FR
 %--------------------------------------------------------------------------
 
 %--------------------------------------------------------------------------
@@ -42,10 +44,9 @@ function caldata  = fake_caldata(varargin)
 %	1 Oct 2012 (SJS):
 %	 -	updated comments format
 %	 - implemented varargin for user control of caldata parameters
-%	8 Apr 2016 (SJS):
-%	 - added features to generate testing caldata values
+%	8 Apr 2016 (SJS): added features to generate testing caldata values
+%	2 May, 2016 (SJS): added some documentation
 %--------------------------------------------------------------------------
-
 
 %--------------------------------------------------------------------------
 % some defaults
