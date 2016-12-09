@@ -74,15 +74,13 @@ Sphase = angle(Sunique);
 
 % This is an evenly spaced frequency vector with Nunique points.
 % scaled by the Nyquist frequency (Fn ==1/2 sample freq.)
-F = Fs/2*linspace(0,1,NFFT/2);
-
-
+F = (Fs/2)*linspace(0, 1, Nunique);
 % generate time vector
 time = ((1:N) - 1) / Fs;
 
 subplot(3, 1, 1), plot(time, s);
 ylabel('Input Signal'); xlabel('time(s)')
-title(varname);
+title(varname, 'Interpreter', 'none');
 
 subplot(3, 1, 2), plot(F, db(Sreal));
 ylabel('FFT Magnitude (dB)'); xlabel('Frequency')

@@ -149,7 +149,7 @@ time = ((1:N) - 1) / Fs;
 % Signal
 subplot(3, 1, 1), plot(time, s);
 ylabel('Input Signal'); xlabel('time(s)')
-title(varname);
+title(varname, 'Interpreter', 'none');
 
 % MAG
 subplot(3, 1, 2)
