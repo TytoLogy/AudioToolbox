@@ -80,7 +80,7 @@ function [sadj, Sfull, Magnorm, f] = ...
 %------------------------------------------------------------------------
 %------------------------------------------------------------------------
 % arbitrary minimum dB value
-MIN_DB = -200;
+MIN_DB = -200; %#ok<NASGU>
 % need to have a small, but non-zero value when taking log, so set that here
 ZERO_VAL = 1e-17;
 
@@ -388,7 +388,7 @@ if strcmpi(COMPMETHOD, 'BOOST')
 	if RANGELIMIT
 		% need to find max, min of calibration range
 		range_indx = find(between(calfreq, corr_frange(1), corr_frange(2))==1);
-		peakmag = max(calmag(range_indx));
+		peakmag = max(calmag(range_indx)); %#ok<*FNDSB>
 	else
 		% find peak magnitude
 		peakmag = max(calmag);
@@ -511,12 +511,10 @@ end
 %------------------------------------------------------------------------
 %------------------------------------------------------------------------
 if strcmpi(COMPMETHOD, 'COMPRESS')
-	
 	% check if LEVEL was specified
 	if LEVEL
 		% normalize by finding deviation from the specified dB level
 		Magnorm = LEVEL - calmag;
-		
 	else
 		% find midpoint of max and min dB level in calibration data
 		% and "compress" around that value
