@@ -2,12 +2,14 @@ function [sadj, Sfull, Magnorm, f] = ...
 							compensate_signal(s, calfreq, calmag, ...
 													Fs, corr_frange, varargin)
 %------------------------------------------------------------------------
-% [sadj, Sfull, Magnorm, f] = compensate_signal(s, calfreq, calmag, Fs, corr_frange)
+% [sadj, Sfull, Magnorm, f] = compensate_signal(s, calfreq, calmag, 
+%																	Fs, corr_frange)
 %------------------------------------------------------------------------
 % 
 % Function that takes an input signal, s, sampled at Fs, and applies calibration 
 % (magnitude only!) information in calfreq, calmag over range corr_frange.
 % 
+% Procedure operates in frequency domain
 %------------------------------------------------------------------------
 % Input Arguments:
 % 	
@@ -44,6 +46,9 @@ function [sadj, Sfull, Magnorm, f] = ...
 %
 %		SmoothEdges	'on' | <[freq_pct window_size]> | 'off' (default)
 %
+%		CorrectPhase 'on' | 'off' (default)
+%	
+%		Phase_us		<calibration phase data in usec>
 % 
 % Output Arguments:
 % 	sadj				compensated verion of vector s
@@ -59,7 +64,7 @@ function [sadj, Sfull, Magnorm, f] = ...
 % Sharad J. Shanbhag
 % sshanbhag@neomed.edu
 %------------------------------------------------------------------------
-% Created: XX XXXX, 2011 (SJS)
+% Created: sometime in 2011 (SJS)
 %
 % Revisions:
 %	1 Oct 2012 (SJS): working on method # 2
@@ -69,9 +74,10 @@ function [sadj, Sfull, Magnorm, f] = ...
 %	22 Aug 2014 (SJS): some tweaks to improve performance.  This function
 % 		should ideally be moved into the general TytoLogy library
 %		- added Prefilter option
+%	10 Jan 2017 (SJS): added CorrectPhase , Phase_us option to 
+% 							 apply phase eq
 %------------------------------------------------------------------------
 % TO DO:
-%	*Implement phase correction in algorithm and switch/tag for input 
 %------------------------------------------------------------------------
 
 %------------------------------------------------------------------------
@@ -108,6 +114,10 @@ RANGELIMIT = 1;
 CORRLIMIT = 0;
 % Smooth freq. transitions at corr_frange limits
 SMOOTHEDGES = 0;
+% correct phase
+CORRECTPHASE = 0;
+% phase info
+Phase_us = [];
 
 %------------------------------------------------------------------------
 %------------------------------------------------------------------------
@@ -244,14 +254,35 @@ if nvararg
 					SMOOTHEDGES = 0;
 				end
 				aindex = aindex + 2;
-				clear lval;				
+				clear lval;	
+				
+			% set CORRECTPHASE option
+			case 'CORRECTPHASE'
+				lval = varargin{aindex + 1};
+				if strcmpi(lval, 'ON')
+					CORRECTPHASE = 1;
+				else
+					CORRECTPHASE = 0;
+				end
+				aindex = aindex + 2;
+				clear lval;
+			
+			% assign Phase_us
+			case 'PHASE_US'
+				lval = varargin{aindex + 1};
+				if isnumeric(lval)
+					Phase_us = lval;
+				else
+					error('%s: Phase data must be numeric!', mfilename);
+				end
+				aindex = aindex + 1;
+				clear lval;
 				
 			otherwise
 				error('%s: Unknown option %s', mfilename, varargin{aindex});
 		end		% END SWITCH
 	end		% END WHILE aindex
 end		% END IF nvararg
-
 
 %------------------------------------------------------------------------
 %------------------------------------------------------------------------
@@ -265,7 +296,6 @@ if corr_frange(2) > max(calfreq)
 	corr_frange(2) = max(calfreq);
 end
 
-
 %------------------------------------------------------------------------
 %------------------------------------------------------------------------
 % prefilter raw signal
@@ -277,7 +307,6 @@ if PREFILTER
 	else
 		pre_frange = corr_frange;
 	end
-	
 	% build bandpass filter
 	% passband definition
 	fband = pre_frange ./ (Fs / 2);
@@ -332,10 +361,6 @@ if isempty(valid_indices)
 end
 % then, get the frequencies for correcting that range
 corr_f = f(valid_indices);
-% set lowcutindices
-if LOWCUT
-	lowcutindices = find(f < LOWCUT);
-end
 
 %------------------------------------------------------------------------
 %------------------------------------------------------------------------
@@ -344,22 +369,11 @@ end
 %------------------------------------------------------------------------
 if SMOOTHEDGES
 	smoothedges_win = SMOOTHEDGES(1) * corr_frange;
-	
 	% get midpoints for smooth windows
 	midpoints = floor(smoothedges_win ./ 2);
 
 	% indices for center of smoothing will be given by valid_indices.
 	% use this to determine indices of Sadj to be smoothed
-% 	% check if lowcut?
-% 	if LOWCUT
-% 		lcindx = max(lowcutindices);
-% 		sindx{1} = (lcindx - midpoints(1)):(lcindx + midpoints(1));
-% 		sindx{2} = (valid_indices(1) - midpoints(1)):(valid_indices(1) + midpoints(1));
-% 		sindx{3} = (valid_indices(end) - midpoints(2)):(valid_indices(end) + midpoints(2));
-% 	else
-% 		sindx{1} = (valid_indices(1) - midpoints(1)):(valid_indices(1) + midpoints(1));
-% 		sindx{2} = (valid_indices(end) - midpoints(2)):(valid_indices(end) + midpoints(2));
-% 	end
 	sindx{1} = (valid_indices(1) - midpoints(1)):(valid_indices(1) + midpoints(1));
 	sindx{2} = (valid_indices(end) - midpoints(2)):(valid_indices(end) + midpoints(2));
 end
@@ -374,6 +388,18 @@ end
 
 %------------------------------------------------------------------------
 %------------------------------------------------------------------------
+% Compute phase correction
+%------------------------------------------------------------------------
+%------------------------------------------------------------------------
+if CORRECTPHASE
+	% interpolate to get the correction values (in radians!)
+	phase_corr_angle = 2*pi*f*0.001*interp1(calfreq, Phase_us, corr_f);
+else
+	phase_corr_angle = zeros(size(corr_f));
+end
+
+%------------------------------------------------------------------------
+%------------------------------------------------------------------------
 % apply correction using BOOST method
 %------------------------------------------------------------------------
 %------------------------------------------------------------------------
@@ -384,7 +410,6 @@ end
 %------------------------------------------------------------------------
 if strcmpi(COMPMETHOD, 'BOOST')
 	% normalize to peak of xfer function
-	
 	if RANGELIMIT
 		% need to find max, min of calibration range
 		range_indx = find(between(calfreq, corr_frange(1), corr_frange(2))==1);
@@ -395,20 +420,16 @@ if strcmpi(COMPMETHOD, 'BOOST')
 	end
 	% normalize by finding deviation from peak
 	Magnorm = peakmag - calmag;
-	
 	% if CORRLIMIT is set, limit correction to specified value
 	if CORRLIMIT
 		Magnorm(Magnorm > CORRLIMIT) = CORRLIMIT;
 	end
-
 	% interpolate to get the correction values (in dB!)
 	corr_vals = interp1(calfreq, Magnorm, corr_f);
-
 	% create adjusted magnitude vector from Smag (in dB)
 	SdBadj = SdBmag;
 	% apply correction
 	SdBadj(valid_indices) = SdBadj(valid_indices) + corr_vals;
-
 	% smooth transitions at edges
 	if SMOOTHEDGES
 		spiece = cell(3, 1);
@@ -417,16 +438,16 @@ if strcmpi(COMPMETHOD, 'BOOST')
 			SdBadj(sindx{n}) = spiece{n};
 		end
 	end
-	
 	% convert back to linear scale...
 	Sadj = invdb(SdBadj);
-
 	% scale for length of signal and divide by 2 to scale for conversion to 
 	% full FFT before inverse FFT
 	Sadj = Nsignal * Sadj ./ 2;
-
+	% apply phase correction
+	Sphaseadj = Sphase;
+	Sphaseadj(valid_indices) = Sphaseadj(valid_indices) + phase_corr_angle;
 	% create compensated time domain signal from spectrum
-	[sadj, Sfull] = synverse(Sadj, Sphase, 'DC', 'no');
+	[sadj, Sfull] = synverse(Sadj, Sphaseadj, 'DC', 'no');
 	% return only 1:Nsignal points
 	sadj = sadj(1:Nsignal);
 end
@@ -443,7 +464,6 @@ end
 %------------------------------------------------------------------------
 if strcmpi(COMPMETHOD, 'ATTEN')
 	% normalize to minimum of xfer function
-	
 	if RANGELIMIT
 		% need to find max, min of calibration range
 		range_indx = find(between(calfreq, corr_frange(1), corr_frange(2))==1);
@@ -454,25 +474,16 @@ if strcmpi(COMPMETHOD, 'ATTEN')
 	end
 	% normalize by finding deviation from peak
 	Magnorm = minmag - calmag;
-	
 	% if CORRLIMIT is set, limit correction to specified value
 	if CORRLIMIT
 		Magnorm(abs(Magnorm) > CORRLIMIT) = -1 * CORRLIMIT;
 	end	
-	
 	% interpolate to get the correction values (in dB!)
 	corr_vals = interp1(calfreq, Magnorm, corr_f);
-
 	% create adjusted magnitude vector from Smag (in dB)
 	SdBadj = SdBmag;
 	% apply correction
 	SdBadj(valid_indices) = SdBadj(valid_indices) + corr_vals;
-
-% 	% set freqs below LOWCUT to MINDB
-% 	if (LOWCUT > 0) && ~isempty(lowcutindices)
-% 		SdBadj(lowcutindices) = MIN_DB;
-% 	end
-% 
 	% smooth transitions at edges
 	if SMOOTHEDGES
 		spiece = cell(3, 1);
@@ -481,16 +492,16 @@ if strcmpi(COMPMETHOD, 'ATTEN')
 			SdBadj(sindx{n}) = spiece{n};
 		end
 	end
-	
 	% convert back to linear scale...
 	Sadj = invdb(SdBadj);
-
 	% scale for length of signal and divide by 2 to scale for conversion to 
 	% full FFT before inverse FFT
 	Sadj = Nsignal * Sadj ./ 2;
-
+	% apply phase correction
+	Sphaseadj = Sphase;
+	Sphaseadj(valid_indices) = Sphaseadj(valid_indices) + phase_corr_angle;
 	% create compensated time domain signal from spectrum
-	[sadj, Sfull] = synverse(Sadj, Sphase, 'DC', 'no');
+	[sadj, Sfull] = synverse(Sadj, Sphaseadj, 'DC', 'no');
 	% return only 1:Nsignal points
 	sadj = sadj(1:Nsignal);
 end
@@ -516,9 +527,10 @@ if strcmpi(COMPMETHOD, 'COMPRESS')
 		% normalize by finding deviation from the specified dB level
 		Magnorm = LEVEL - calmag;
 	else
-		% find midpoint of max and min dB level in calibration data
-		% and "compress" around that value
-		
+	%----------------------------------------
+	% find midpoint of max and min dB level in calibration data
+	% and "compress" around that value
+	%----------------------------------------
 		% check if rangelimit was specified
 		if RANGELIMIT
 			% need to find max, min of calibration range
@@ -540,7 +552,6 @@ if strcmpi(COMPMETHOD, 'COMPRESS')
 			Magnorm = midmag - calmag;
 		end
 	end
-	
 	% if CORRLIMIT is set, limit correction to specified value
 	if CORRLIMIT
 		if all(Magnorm < CORRLIMIT)
@@ -555,20 +566,12 @@ if strcmpi(COMPMETHOD, 'COMPRESS')
 		Magnorm(Magnorm > CORRLIMIT) = CORRLIMIT;
 		Magnorm(Magnorm < -CORRLIMIT) = -CORRLIMIT;
 	end
-	
 	% interpolate to get the correction values (in dB!)
 	corr_vals = interp1(calfreq, Magnorm, corr_f);
-	
 	% create adjusted magnitude vector from Smag (in dB)
 	SdBadj = SdBmag;
 	% apply correction
 	SdBadj(valid_indices) = SdBadj(valid_indices) + corr_vals;
-
-% 	% set freqs below LOWCUT to MINDB
-% 	if (LOWCUT > 0) && ~isempty(lowcutindices)
-% 		SdBadj(lowcutindices) = MIN_DB;
-% 	end
-	
 	% smooth transitions at edges
 	if SMOOTHEDGES
 		spiece = cell(3, 1);
@@ -577,16 +580,16 @@ if strcmpi(COMPMETHOD, 'COMPRESS')
 			SdBadj(sindx{n}) = spiece{n};
 		end
 	end
-	
 	% convert back to linear scale...
 	Sadj = invdb(SdBadj);
-
 	% scale for length of signal and divide by 2 to scale for conversion to 
 	% full FFT before inverse FFT
 	Sadj = Nsignal * Sadj ./ 2;
-
+	% apply phase correction
+	Sphaseadj = Sphase;
+	Sphaseadj(valid_indices) = Sphaseadj(valid_indices) + phase_corr_angle;
 	% create compensated time domain signal from spectrum
-	[sadj, Sfull] = synverse(Sadj, Sphase, 'DC', 'no');
+	[sadj, Sfull] = synverse(Sadj, Sphaseadj, 'DC', 'no');
 	% return only 1:Nsignal points
 	sadj = sadj(1:Nsignal);
 end
@@ -597,7 +600,9 @@ end
 %------------------------------------------------------------------------
 %------------------------------------------------------------------------
 if LOWCUT
-	% build highpass filter
+	%----------------------------------------
+	% highpass filter
+	%----------------------------------------
 	% passband definition
 	lcfc = LOWCUT ./ (Fs / 2);
 	% filter coefficients using a butterworth highpass filter
@@ -612,13 +617,14 @@ end
 %------------------------------------------------------------------------
 %------------------------------------------------------------------------
 if POSTFILTER
+	%----------------------------------------
+	% bandpass filter
+	%----------------------------------------
 	if length(POSTFILTER) == 2
 		post_frange = POSTFILTER;
 	else
 		post_frange = corr_frange;
 	end
-	
-	% build bandpass filter
 	% passband definition
 	fband = post_frange ./ (Fs / 2);
 	% filter coefficients using a butterworth bandpass filter
