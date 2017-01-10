@@ -361,10 +361,6 @@ if isempty(valid_indices)
 end
 % then, get the frequencies for correcting that range
 corr_f = f(valid_indices);
-% % set lowcutindices
-% if LOWCUT
-% 	lowcutindices = find(f < LOWCUT);
-% end
 
 %------------------------------------------------------------------------
 %------------------------------------------------------------------------
@@ -378,16 +374,6 @@ if SMOOTHEDGES
 
 	% indices for center of smoothing will be given by valid_indices.
 	% use this to determine indices of Sadj to be smoothed
-% 	% check if lowcut?
-% 	if LOWCUT
-% 		lcindx = max(lowcutindices);
-% 		sindx{1} = (lcindx - midpoints(1)):(lcindx + midpoints(1));
-% 		sindx{2} = (valid_indices(1) - midpoints(1)):(valid_indices(1) + midpoints(1));
-% 		sindx{3} = (valid_indices(end) - midpoints(2)):(valid_indices(end) + midpoints(2));
-% 	else
-% 		sindx{1} = (valid_indices(1) - midpoints(1)):(valid_indices(1) + midpoints(1));
-% 		sindx{2} = (valid_indices(end) - midpoints(2)):(valid_indices(end) + midpoints(2));
-% 	end
 	sindx{1} = (valid_indices(1) - midpoints(1)):(valid_indices(1) + midpoints(1));
 	sindx{2} = (valid_indices(end) - midpoints(2)):(valid_indices(end) + midpoints(2));
 end
@@ -498,11 +484,6 @@ if strcmpi(COMPMETHOD, 'ATTEN')
 	SdBadj = SdBmag;
 	% apply correction
 	SdBadj(valid_indices) = SdBadj(valid_indices) + corr_vals;
-% 	% set freqs below LOWCUT to MINDB
-% 	if (LOWCUT > 0) && ~isempty(lowcutindices)
-% 		SdBadj(lowcutindices) = MIN_DB;
-% 	end
-% 
 	% smooth transitions at edges
 	if SMOOTHEDGES
 		spiece = cell(3, 1);
@@ -546,8 +527,10 @@ if strcmpi(COMPMETHOD, 'COMPRESS')
 		% normalize by finding deviation from the specified dB level
 		Magnorm = LEVEL - calmag;
 	else
-		% find midpoint of max and min dB level in calibration data
-		% and "compress" around that value
+	%----------------------------------------
+	% find midpoint of max and min dB level in calibration data
+	% and "compress" around that value
+	%----------------------------------------
 		% check if rangelimit was specified
 		if RANGELIMIT
 			% need to find max, min of calibration range
@@ -589,12 +572,6 @@ if strcmpi(COMPMETHOD, 'COMPRESS')
 	SdBadj = SdBmag;
 	% apply correction
 	SdBadj(valid_indices) = SdBadj(valid_indices) + corr_vals;
-
-% 	% set freqs below LOWCUT to MINDB
-% 	if (LOWCUT > 0) && ~isempty(lowcutindices)
-% 		SdBadj(lowcutindices) = MIN_DB;
-% 	end
-	
 	% smooth transitions at edges
 	if SMOOTHEDGES
 		spiece = cell(3, 1);
@@ -623,7 +600,9 @@ end
 %------------------------------------------------------------------------
 %------------------------------------------------------------------------
 if LOWCUT
-	% build highpass filter
+	%----------------------------------------
+	% highpass filter
+	%----------------------------------------
 	% passband definition
 	lcfc = LOWCUT ./ (Fs / 2);
 	% filter coefficients using a butterworth highpass filter
@@ -638,13 +617,14 @@ end
 %------------------------------------------------------------------------
 %------------------------------------------------------------------------
 if POSTFILTER
+	%----------------------------------------
+	% bandpass filter
+	%----------------------------------------
 	if length(POSTFILTER) == 2
 		post_frange = POSTFILTER;
 	else
 		post_frange = corr_frange;
 	end
-	
-	% build bandpass filter
 	% passband definition
 	fband = post_frange ./ (Fs / 2);
 	% filter coefficients using a butterworth bandpass filter
