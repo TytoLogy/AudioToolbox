@@ -32,7 +32,7 @@ gui_State = struct('gui_Name',       mfilename, ...
                    'gui_OutputFcn',  @PlotCal_OutputFcn, ...
                    'gui_LayoutFcn',  [] , ...
                    'gui_Callback',   []);
-if nargin & ischar(varargin{1})
+if nargin && ischar(varargin{1})
     gui_State.gui_Callback = str2func(varargin{1});
 end
 
@@ -270,6 +270,36 @@ function Update_ctrl_Callback(hObject, eventdata, handles)
 				warndlg('no background data', mfilename);
 				return
 			end
+		%--------------------------------
+		% 11: Magnitude (Volts)
+		%--------------------------------
+		case 11
+			if isfield(caldata,'magsraw')
+				pdata.v1 = mean(caldata.magsV{1}, 2);
+				pdata.v2 = mean(caldata.magsV{2}, 2);
+				pdata.e1 = std(caldata.magsV{1}, 0, 2);
+				pdata.e2 = std(caldata.magsV{2}, 0, 2);	
+				pdata.y_label = 'Magnitude (Volts)';
+				pdata.cmd = @errorbar;
+			else
+				warndlg('no magsraw data', mfilename);
+				return
+			end
+		%--------------------------------
+		% 12: Magnitude (dbV)
+		%--------------------------------
+		case 12
+			if isfield(caldata,'magsraw')
+				pdata.v1 = db(mean(caldata.magsV{1}, 2));
+				pdata.v2 = db(mean(caldata.magsV{2}, 2));
+				pdata.e1 = db(std(caldata.magsV{1}, 0, 2));
+				pdata.e2 = db(std(caldata.magsV{2}, 0, 2));
+				pdata.y_label = 'Magnitude (dB V)';
+				pdata.cmd = @errorbar;
+			else
+				warndlg('no magsraw data for dB V calculation!', mfilename);
+				return
+			end
 
 	end
 
@@ -352,19 +382,16 @@ function Update_ctrl_Callback(hObject, eventdata, handles)
 	else
 		update_ui_str(handles.Dataname, 'unknown calfile name');
 	end
-	
 	%-------------------------------------------------------------------
 	% store pdata struct in handles, update hObject
 	%-------------------------------------------------------------------
 	handles.pdata = pdata;
 	guidata(hObject, handles);
 %-------------------------------------------------------------------------
-
 %-------------------------------------------------------------------------
 function PlotSelect_Callback(hObject, eventdata, handles)
 	Update_ctrl_Callback(hObject, eventdata, handles);
 %-------------------------------------------------------------------------
-
 %-------------------------------------------------------------------------
 function AutoXLimitCtrl_Callback(hObject, eventdata, handles)
 	currentVal = read_ui_val(hObject);
@@ -382,7 +409,6 @@ function AutoXLimitCtrl_Callback(hObject, eventdata, handles)
 		xlim(handles.axes1, [lim1 lim2]);
 	end
 %-------------------------------------------------------------------------
-
 %-------------------------------------------------------------------------
 function AutoYLimitCtrl_Callback(hObject, eventdata, handles)
 	currentVal = read_ui_val(hObject);
@@ -400,8 +426,6 @@ function AutoYLimitCtrl_Callback(hObject, eventdata, handles)
 		ylim(handles.axes1, [lim1 lim2]);
 	end
 %-------------------------------------------------------------------------
-
-
 %-------------------------------------------------------------------------
 function XMinCtrl_Callback(hObject, eventdata, handles)
 	newlim = xlim(handles.axes1);
@@ -416,7 +440,6 @@ function XMaxCtrl_Callback(hObject, eventdata, handles)
 	newlim(2) = newval;
 	xlim(newlim);
 %-------------------------------------------------------------------------
-
 %-------------------------------------------------------------------------
 % --- Executes on selection change in XScaleCtrl.
 %-------------------------------------------------------------------------
@@ -425,8 +448,6 @@ function XScaleCtrl_Callback(hObject, eventdata, handles)
 	guidata(hObject, handles);
 	Update_ctrl_Callback(hObject, eventdata, handles);
 %-------------------------------------------------------------------------
-
-
 %-------------------------------------------------------------------------
 function YMinCtrl_Callback(hObject, eventdata, handles)
 	newlim = ylim(handles.axes1);
@@ -441,8 +462,6 @@ function YMaxCtrl_Callback(hObject, eventdata, handles)
 	newlim(2) = newval;
 	ylim(newlim);
 %-------------------------------------------------------------------------
-
-
 %-------------------------------------------------------------------------
 % --- Executes on selection change in PlotChannelCtrl.
 %-------------------------------------------------------------------------
@@ -586,32 +605,50 @@ function PlotSelect_CreateFcn(hObject, eventdata, handles)
 	else
 	    set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
 	end
-	set(hObject, 'String', {'Magnitude', 'Correction Magnitude', 'Phase', 'Distortion', ...
-							'Leak Magnitude', 'Leak Phase', 'Leak Distortion', ...
-							'Magnitude StdErr', 'Phase StdErr', 'Background'});
+	set(hObject, 'String', ...
+			{	'Magnitude (dB SPL)', ...
+				'Correction Magnitude (dB)', ...
+				'Phase', ...
+				'Distortion (%)', ...
+				'Leak Magnitude (dB)', ...
+				'Leak Phase', ...
+				'Leak Distortion', ...
+				'Magnitude StdErr', ...
+				'Phase StdErr', ...
+				'Background', ...
+				'Magnitude (V)', ...
+				'Magnitude (dbV)'	...
+			}...
+		);
 %-------------------------------------------------------------------------
 function XMinCtrl_CreateFcn(hObject, eventdata, handles)
-	if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+	if ispc && isequal(get(hObject,'BackgroundColor'), ...
+											get(0,'defaultUicontrolBackgroundColor'))
 		 set(hObject,'BackgroundColor','white');
 	end
 function XMaxCtrl_CreateFcn(hObject, eventdata, handles)
-	if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+	if ispc && isequal(get(hObject,'BackgroundColor'), ...
+											get(0,'defaultUicontrolBackgroundColor'))
 		 set(hObject,'BackgroundColor','white');
 	end
 function YMaxCtrl_CreateFcn(hObject, eventdata, handles)
-	if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+	if ispc && isequal(get(hObject,'BackgroundColor'), ...
+											get(0,'defaultUicontrolBackgroundColor'))
 		 set(hObject,'BackgroundColor','white');
 	end
 function YMinCtrl_CreateFcn(hObject, eventdata, handles)
-	if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+	if ispc && isequal(get(hObject,'BackgroundColor'), ...
+											get(0,'defaultUicontrolBackgroundColor'))
 		 set(hObject,'BackgroundColor','white');
 	end
 function PlotChannelCtrl_CreateFcn(hObject, eventdata, handles)
-	if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+	if ispc && isequal(get(hObject,'BackgroundColor'), ...
+											get(0,'defaultUicontrolBackgroundColor'))
 		 set(hObject,'BackgroundColor','white');
 	end
 function XScaleCtrl_CreateFcn(hObject, eventdata, handles)
-	if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+	if ispc && isequal(get(hObject,'BackgroundColor'), ...
+											get(0,'defaultUicontrolBackgroundColor'))
 		 set(hObject,'BackgroundColor','white');
 	end
 %-------------------------------------------------------------------------
