@@ -32,7 +32,8 @@ function y = sin2array(a, dur, fs)
 rampbins = floor(fs * dur / 1000);
 
 if 2*rampbins > length(a)
-	error('ramparray: ramp duration > length of stimulus');
+	error('%s: ramp duration (%d) > length of stimulus (%d)', ...
+				mfilename, rampbins, length(a));
 end
 
 ramp1x = linspace(0, pi/2, rampbins);
