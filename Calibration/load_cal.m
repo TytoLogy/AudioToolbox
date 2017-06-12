@@ -35,9 +35,10 @@ function caldata = load_cal(filename, varargin)
 %--------------------------------------------------------------------------
 %
 % Created:	12 April, 2016
-%	Supersedes load_headphone_cal.m on which it is based
+%	Supercedes load_headphone_cal.m on which it is based
 %
 % Revisions:
+%	1 Jun 2017 (SJS): only loads caldata struct
 %--------------------------------------------------------------------------
 
 if nargin ~= 2
@@ -50,7 +51,7 @@ if ~exist(filename, 'file')
 	error(['Calibration file ' filename ' not found']);
 end
 
-load(filename, '-MAT');
+load(filename, '-MAT', 'caldata');
 
 caldata.phase_us = caldata.phase; %#ok<NODEF>
 % preconvert phases from angle (RADIANS) to microsecond

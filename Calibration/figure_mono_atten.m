@@ -32,6 +32,11 @@ function [atten_val] = figure_mono_atten(spl_val, rms_val, caldata)
 %---------------------------------------------------------------------
 MAXATTEN = 120;
 
+if length(spl_val) ~= length(rms_val)
+	error('%s: mismatch in length of spl_val (%d) and rms_val (%d)', ...
+					mfilename, length(spl_val), length(rms_val));
+end
+
 % # of atten values needed
 nvals = length(spl_val);
 % preallocate
