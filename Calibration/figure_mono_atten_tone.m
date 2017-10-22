@@ -54,5 +54,3 @@ end
 atten_val(atten_val < 0) = 0;
 % set values to max atten when spl_val == 0
 atten_val(spl_val == 0) = MAXATTEN;
-
-
