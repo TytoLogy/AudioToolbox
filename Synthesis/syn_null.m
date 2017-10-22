@@ -1,5 +1,9 @@
-function S  = syn_null(duration, Fs, STEREO)
-%function S  = syn_null(duration, Fs, stereo)
+function S = syn_null(duration, Fs, STEREO)
+%-------------------------------------------------------------------------
+% S = syn_null(duration, Fs, stereo)
+%-------------------------------------------------------------------------
+% TytoLogy:AudioToolbox:Synthesis Toolbox
+%-------------------------------------------------------------------------
 %	Input Arguments:
 %		duration = time of stimulus in ms
 %		Fs = output sampling rate
@@ -7,15 +11,17 @@ function S  = syn_null(duration, Fs, STEREO)
 %	
 %	Output Arguments:
 %		S = L & R null data
+%-------------------------------------------------------------------------
 
-
+%-------------------------------------------------------------------------
 %	Sharad Shanbhag
-%	sharad@etho.caltech.edu
+%	sshanbhag@neomed.edu
 %
 %--Revision History---------------------------------------------------
 % 3 August, 2003, SJS
 %	created from syn_tone
-%
+% 22 Oct,2017 (SJS): updated notes
+%-------------------------------------------------------------------------
 
 if nargin ~= 3
 	error('syn_null: incorrect number of input arguments');
@@ -23,7 +29,7 @@ end
 
 duration = 0.001 * duration;
 dt = 1/Fs;
-tvec = dt*[0:(Fs * duration)-1];
+tvec = dt*(0:(Fs * duration)-1);
 
 S(1, :) = 0 * tvec;
 if STEREO
