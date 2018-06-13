@@ -32,6 +32,9 @@ end
 if fstart < 0
 	error('%s: fstart must be greater than 0', mfilename);
 end
+if Fs <= 0
+	error('%s: Fs must be greater than 0', mfilename);
+end
 if fend > (Fs/2)
 	error('%s: fend is greater than Nyquist frequency (%.4f)', mfilename, Fs/2);
 end
