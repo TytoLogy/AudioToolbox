@@ -1,6 +1,6 @@
 function S  = syn_chirp(duration, fstart, fend, Fs, swtype)
 %---------------------------------------------------------------------
-% S = syn_logchirp(duration, delay, Fs)
+% S = syn_chirp(duration, delay, Fs)
 %---------------------------------------------------------------------
 % Tytology:AudioToolbox:Synthesis
 %---------------------------------------------------------------------
@@ -44,7 +44,7 @@ if ~any(strcmpi(swtype, {'log', 'linear'}))
 	error('%s: swtype %s is neither ''log'' nor ''linear''', mfilename, swtype);
 end
 % create chirp
-if strcmpi(swtype, 'log')
+if strcmpi(swtype(1:3), 'log')
 	S = chirp(	(0:(1/Fs):(duration/1000)), ...
 				fstart, duration/1000, fend, 'logarithmic');
 else

@@ -20,6 +20,7 @@ function S  = syn_logchirp(duration, fstart, fend, Fs)
 %--Revision History---------------------------------------------------
 % 16 May, 2018
 %	Program Created
+% 13 Jun 2018 (SJS): superceded by syn_chirp
 %---------------------------------------------------------------------
 
 % check inputs
