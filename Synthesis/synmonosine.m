@@ -1,8 +1,8 @@
 function [S, Smag, Sphi]  = synmonosine(duration, Fs, freq, scale, caldata)
 %-------------------------------------------------------------------------
-%[S, Smag, Sphase]  = synmonosine(duration, Fs, freq, scale, caldata)
+% [S, Smag, Sphase]  = synmonosine(duration, Fs, freq, scale, caldata)
 %-------------------------------------------------------------------------
-% Synthesis Toolbox
+% TytoLogy:AudioToolbox:Synthesis Toolbox
 %-------------------------------------------------------------------------
 % 
 % 	synthesize a single-channel (mono) tone , typically for use with 
@@ -41,12 +41,11 @@ if nargin ~= 5
 	help synmonosine;
 	error('synmonosine: incorrect number of input arguments');
 end
-
 if duration <= 0
 	error('synmonosine: duration must be > 0')
 end
 if freq <= 0 
-	error('synmonosine: freq  must be greater than 0');
+	error('synmonosine: freq must be greater than 0');
 end
 if freq > Fs / 2
 	warning('synmonosine: freq is greater than Nyquist freq (Fs/2)');
@@ -67,9 +66,10 @@ omega = 2 * pi * freq;
 % calibration data, caldata, or pick a random value for phase and mag = 1
 if CAL
 	% get the calibration magnitudes and phases
-	[Smag(1, 1), Sphi(1, 1)] = get_cal(freq, caldata.freq(1, :), caldata.maginv(1, :), caldata.phase(1, :));
+	[Smag(1, 1), Sphi(1, 1)] = get_cal(freq, caldata.freq(1, :), ...
+															caldata.maginv(1, :), ...
+															caldata.phase(1, :));
 	Sphi(1, 1) = -Sphi(1, 1);
-% 	Smag = scale ./ Smag;
 	Smag = scale .* Smag;
 else
 	Smag = scale;

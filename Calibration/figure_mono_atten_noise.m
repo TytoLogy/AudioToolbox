@@ -1,11 +1,11 @@
-function [atten_val] = figure_mono_atten(spl_val, rms_val, caldata)
-%[atten_val] = figure_mono_atten(spl_val, rms_val, caldata)
+function [atten_val] = figure_mono_atten_noise(spl_val, rms_val, caldata)
+%[atten_val] = figure_mono_atten_noise(spl_val, rms_val, caldata)
 %---------------------------------------------------------------------
 % TytoLogy AudioToolbox:Calibration Toolbox
 %---------------------------------------------------------------------
 % 
 %	Given rms_value of sound and calibration data (caldata),	computes the 
-% 	atten_val required to obtain desired spl_val output levels.
+% 	atten_val required to obtain desired spl_val output levels for noise
 % 	
 % 	Same as figure_headphone_atten.m, but with no checks on max/min atten
 % 	levels
@@ -45,10 +45,10 @@ nvals = length(spl_val);
 atten_val = zeros(size(spl_val));
 % assign values
 for n = 1:nvals
-% 	atten_val(n) = caldata.mindbspl(1) + db(rms_val(n)) - spl_val(n);
+	atten_val(n) = caldata.mindbspl(1) + db(rms_val(n)) - spl_val(n);
 % 	atten_val(n) = caldata.mindbspl(1) + ...
 % 					db(caldata.cal.VtoPa(1).*rms_val(n)) - spl_val(n);
-	atten_val(n) = caldata.mindbspl(1) - spl_val(n);
+% 	atten_val(n) = caldata.mindbspl(1) - spl_val(n);
 end
 % set values < 0 to 0
 atten_val(atten_val < 0) = 0;
