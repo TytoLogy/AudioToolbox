@@ -10,11 +10,13 @@ function S  = syn_click(duration, delay, Fs)
 
 %---------------------------------------------------------------------
 %	Sharad Shanbhag
-%	sharad@etho.caltech.edu
+%	sshanbhag@neomed.edu
 %
 %--Revision History---------------------------------------------------
 % 21 December, 2007
 %	Program Created
+% 24 Aug 2018 (SJS):
+%	- updated email, forced to row vector form
 %---------------------------------------------------------------------
 
 if nargin ~= 3
@@ -26,7 +28,8 @@ if duration <= 0
 end
 
 dt = 1000 * 1/Fs;
-S = zeros(ms2bin(duration, Fs), 1);
+% force into row vector form
+S(1, :) = zeros(ms2bin(duration, Fs), 1);
 
 
 if delay == 0
