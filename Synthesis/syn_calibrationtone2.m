@@ -1,5 +1,9 @@
 function [S, Smag, Sphi] = syn_calibrationtone2(duration, Fs, freq, rad_vary, channel)
-%function [S, Smag, Sphi] = syn_calibrationtone2(duration, Fs, freq, rad_vary, channel)
+%---------------------------------------------------------------------
+%[S, Smag, Sphi] = syn_calibrationtone2(duration, Fs, freq, rad_vary, channel)
+%---------------------------------------------------------------------
+% Tytology:AudioToolbox:Synthesis
+%---------------------------------------------------------------------
 %	Input Arguments:
 %		duration = time of stimulus in ms
 %		Fs = output sampling rate
@@ -25,7 +29,7 @@ if nargin ~= 5
 end
 
 tbins = ms2bin(duration, Fs);
-tvec = (1/Fs)*[0:(tbins-1)];
+tvec = (1/Fs)*(0:(tbins-1));
 omega = 2 * pi * freq;
 
 if rad_vary
