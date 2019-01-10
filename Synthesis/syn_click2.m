@@ -1,5 +1,9 @@
 function S  = syn_click2(duration, delaysamples, clicksamples, Fs)
-%S = syn_click2(duration, delaysamples, clicksamples, Fs)
+%---------------------------------------------------------------------
+% S = syn_click2(duration, delaysamples, clicksamples, Fs)
+%---------------------------------------------------------------------
+% Tytology:AudioToolbox:Synthesis
+%---------------------------------------------------------------------
 %	Input Arguments:
 %		duration = time of total stimulus in ms
 %		delaysamples = delay of click in samples
@@ -8,14 +12,16 @@ function S  = syn_click2(duration, delaysamples, clicksamples, Fs)
 %	
 %	Output Arguments:
 %		S = 1 channel array of stimuls
+%---------------------------------------------------------------------
 
 %---------------------------------------------------------------------
 %	Sharad Shanbhag
-%	sharad@etho.caltech.edu
-%
+%	sshanbhag@neomed.edu
 %--Revision History---------------------------------------------------
 % 21 December, 2007
 %	Program Created
+% 25 Aug 2018 (SJS): updated comments
+%		probably need to make inputs use common units (time or samples)
 %---------------------------------------------------------------------
 
 if nargin ~= 4
