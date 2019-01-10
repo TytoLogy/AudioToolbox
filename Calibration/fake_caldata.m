@@ -46,6 +46,7 @@ function caldata  = fake_caldata(varargin)
 %	 - implemented varargin for user control of caldata parameters
 %	8 Apr 2016 (SJS): added features to generate testing caldata values
 %	2 May, 2016 (SJS): added some documentation
+%	9 Jan,, 2019 (SJS): fixed issue in Fs varargin processing
 %--------------------------------------------------------------------------
 
 %--------------------------------------------------------------------------
@@ -71,7 +72,7 @@ if nvararg
 		switch(upper(varargin{aindex}))
 			
 			% set Fs
-			case 'Fs'
+			case 'FS'
 				if isnumeric(varargin{aindex+1})
 					Fs = varargin{aindex+1};
 					aindex = aindex + 2;

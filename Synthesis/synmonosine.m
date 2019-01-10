@@ -1,6 +1,8 @@
-function [S, Smag, Sphi]  = synmonosine(duration, Fs, freq, scale, caldata)
+function [S, Smag, Sphi]  = synmonosine(duration, Fs, freq, scale, ...
+														caldata, varargin)
 %-------------------------------------------------------------------------
-% [S, Smag, Sphase]  = synmonosine(duration, Fs, freq, scale, caldata)
+% [S, Smag, Sphase]  = synmonosine(duration, Fs, freq, scale, ...
+% 																	caldata, rad_vary)
 %-------------------------------------------------------------------------
 % TytoLogy:AudioToolbox:Synthesis Toolbox
 %-------------------------------------------------------------------------
@@ -10,17 +12,19 @@ function [S, Smag, Sphi]  = synmonosine(duration, Fs, freq, scale, caldata)
 % 
 %-------------------------------------------------------------------------
 % Input Arguments:
-%	dur		= signal duration (ms)
-%	Fs 		= output sampling rate
-%	freq 	= frequency 
-%	scale	= rms scale factor.  
-%	caldata = caldata structure (caldata.mag, caldata.freq, caldata.phase)
+%	dur		signal duration (ms)
+%	Fs 		output sampling rate
+%	freq		frequency 
+%	scale		rms scale factor.  
+%	caldata	caldata structure (caldata.mag, caldata.freq, caldata.phase)
 %				if no calibration is desired, replace caldata with value 0
-%
+%	rad_vary if 1, randomize phase, if 0 or not provided use phase = 0
+% 				** note different arg order compared to syn_tone!!!!
+% 
 % Output arguments:
 %	S				[1XN] array, where N = 0.001*dur*Fs
 %-------------------------------------------------------------------------
-% See Also:
+% See Also: syn_tone, syn_headphone_tone
 %-------------------------------------------------------------------------
 
 
@@ -34,10 +38,11 @@ function [S, Smag, Sphi]  = synmonosine(duration, Fs, freq, scale, caldata)
 % Revision History:
 %	11 March, 2010 (SJS): updated comments
 %	7 Jun 2016 (SJS): touch up.
+%	10 Jan 2019 (SJS): added varargin (for radvary)
 %--------------------------------------------------------------------------
 
 % do some basic checks on the input arguments
-if nargin ~= 5
+if nargin < 5
 	help synmonosine;
 	error('synmonosine: incorrect number of input arguments');
 end
@@ -50,7 +55,14 @@ end
 if freq > Fs / 2
 	warning('synmonosine: freq is greater than Nyquist freq (Fs/2)');
 end
-
+% vary phase randomly?
+rad_vary = 0;
+if ~isempty(varargin)
+	if varargin{1} == 1
+		rad_vary = pi * rand(1, 1);
+	end
+end
+% calibrate stimulus?
 CAL = 0;
 if isstruct(caldata)
 	CAL = 1;
@@ -59,7 +71,9 @@ end
 % convert duration to seconds, compute # of samples in stim
 duration = 0.001 * duration;
 dt = 1/Fs;
+% generate time vector
 tvec = dt*(0:(Fs * duration)-1);
+% convert to angular frequency
 omega = 2 * pi * freq;
 
 % get values for Smag (magnitude) and Sphase (phase), from either the
@@ -75,5 +89,8 @@ else
 	Smag = scale;
 	Sphi = pi * limited_uniform(1, 1);
 end
-	
-S = Smag(1) * sin( omega * tvec + Sphi(1) );
+
+% create sinusoid
+S = Smag(1) * sin( omega * tvec + Sphi(1) + rad_vary );
+% done!
+
