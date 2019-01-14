@@ -58,7 +58,7 @@ end
 % vary phase randomly?
 rad_vary = 0;
 if ~isempty(varargin)
-	if varargin{1} == 1
+	if numel(varargin{1}) == 1
 		rad_vary = pi * rand(1, 1);
 	end
 end
