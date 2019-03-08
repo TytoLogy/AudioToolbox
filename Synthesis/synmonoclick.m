@@ -2,7 +2,7 @@ function S = synmonoclick(stimdur, Fs, delay, clickdur, scale)
 %-------------------------------------------------------------------------
 % S = synmonoclick(stimdur, Fs, delay, clickdur, scale)
 %-------------------------------------------------------------------------
-% Synthesis Toolbox
+% TytoLogy -> Synthesis Toolbox
 %-------------------------------------------------------------------------
 % 
 % 	synthesize a single-channel (mono) click, typically for use with 
@@ -24,10 +24,11 @@ function S = synmonoclick(stimdur, Fs, delay, clickdur, scale)
 
 %--------------------------------------------------------------------------
 % Sharad J. Shanbhag
-% sharad.shanbhag@einstein.yu.edu
+% sshanbhag@neomed.edu
 %--------------------------------------------------------------------------
 % Created: 11 March, 2010 (SJS) from synmononoise_fft
 % Revision History:
+% 7 Mar 2019 (SJS): fixed clicdur issue - needed to convert to bins
 %--------------------------------------------------------------------------
 
 % do some basic checks on the input arguments
@@ -43,18 +44,20 @@ if delay < 0
 	error('%s: delay must be >= 0', mfilename);
 end
 
+% convert time in ms to bins
 stimdurBins = ms2bin(stimdur, Fs);
 delayBins = ms2bin(delay, Fs);
+clickdurBins = ms2bin(clickdur, Fs);
 
-if (delayBins + clickdur) > stimdurBins
-	error('%s: delayBins + clickdur must be <= stimdurBins!', mfilename)
+if (delayBins + clickdurBins) > stimdurBins
+	error('%s: delay + clickdur must be <= stimdur!', mfilename)
 end
 
 S = zeros(1, ms2bin(stimdur, Fs));
-clickStim = ones(1, clickdur);
+clickStim = ones(1, clickdurBins);
 
 if delayBins
-	S(delayBins:(delayBins+clickdur-1)) = clickStim;
+	S(delayBins:(delayBins+clickdurBins-1)) = clickStim;
 else
 	S(1:length(clickStim)) = clickStim;
 end
