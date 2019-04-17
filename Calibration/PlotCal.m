@@ -131,7 +131,7 @@ function PlotCal_OpeningFcn(hObject, eventdata, handles, varargin)
 %-------------------------------------------------------------------------
 % Update Plots
 %-------------------------------------------------------------------------
-function Update_ctrl_Callback(hObject, eventdata, handles)
+function Update_ctrl_Callback(hObject, eventdata, handles) %#ok<*INUSL>
 	axes(handles.axes1);
 	cla;
 	if isfield(handles, 'caldata')
@@ -393,11 +393,11 @@ function PlotSelect_Callback(hObject, eventdata, handles)
 	Update_ctrl_Callback(hObject, eventdata, handles);
 %-------------------------------------------------------------------------
 %-------------------------------------------------------------------------
-function AutoXLimitCtrl_Callback(hObject, eventdata, handles)
+function AutoXLimitCtrl_Callback(hObject, eventdata, handles) %#ok<*DEFNU>
 	currentVal = read_ui_val(hObject);
 	if currentVal == 1
 		set(handles.axes1, 'XLimMode', 'auto');
-		newlim = xlim(handles.axes1);
+% 		newlim = xlim(handles.axes1);
 		disable_ui(handles.XMinCtrl);
 		disable_ui(handles.XMaxCtrl);
 	else
@@ -414,7 +414,7 @@ function AutoYLimitCtrl_Callback(hObject, eventdata, handles)
 	currentVal = read_ui_val(hObject);
 	if currentVal == 1
 		set(handles.axes1, 'YLimMode', 'auto');
-		newlim = ylim(handles.axes1);
+% 		newlim = ylim(handles.axes1);
 		disable_ui(handles.YMinCtrl);
 		disable_ui(handles.YMaxCtrl);
 	else
@@ -490,7 +490,7 @@ function LoadCalMenuItem_Callback(hObject, eventdata, handles)
 		handles.caldata = load_headphone_cal(datafile);
 
 		% check if caldata has reference channel data (3)
-		[n, m] = size(handles.caldata.mag);
+		[n, ~] = size(handles.caldata.mag);
 		if n == 3
 			disp([mfilename ': calibration data has reference channel information'])
 			handles.ReferenceChannel = 1;
@@ -521,8 +521,6 @@ function SaveFigureMenuItem_Callback(hObject, eventdata, handles)
 	end
 %-------------------------------------------------------------------------
 
-
-
 %-------------------------------------------------------------------------
 %-------------------------------------------------------------------------
 function IndividualPlotMenuItem_Callback(hObject, eventdata, handles)
@@ -536,7 +534,7 @@ function IndividualPlotMenuItem_Callback(hObject, eventdata, handles)
 	
 	if isfield(handles.caldata, 'settings')
 		if isfield(handles.caldata.settings, 'calfile')
-			[pname, fname, ~] = fileparts(handles.caldata.settings.calfile);
+			[~, fname, ~] = fileparts(handles.caldata.settings.calfile);
 		else
 			fname = {};
 		end
@@ -549,7 +547,6 @@ function IndividualPlotMenuItem_Callback(hObject, eventdata, handles)
 	else
 		tstr = plotStrings{plotVal};
 	end
-	
 	
 	title(tstr, 'Interpreter', 'none')
 %-------------------------------------------------------------------------
@@ -599,7 +596,7 @@ function varargout = PlotCal_OutputFcn(hObject, eventdata, handles)
 %-------------------------------------------------------------------------
 
 %-------------------------------------------------------------------------
-function PlotSelect_CreateFcn(hObject, eventdata, handles)
+function PlotSelect_CreateFcn(hObject, eventdata, handles) %#ok<*INUSD>
 	if ispc
 	    set(hObject,'BackgroundColor','white');
 	else
