@@ -38,7 +38,9 @@ function caldata = load_cal_and_smooth(filename, smooth_window, varargin)
 % Created:	30 May, 2019 from load_cal
 %
 % Revisions:
-%	30 May, 2019 SJS): add smoothing
+%	30 May, 2019 (SJS): add smoothing
+%	10 Jun, 2019 (SJS): trying to harmonize fields/values between
+%		caldata from NICal and Calibrate programs... it is a fucking mess
 %--------------------------------------------------------------------------
 
 if nargin < 2
@@ -103,7 +105,11 @@ if ~noinverse
 	caldata.maginv(2, :) = invdb(caldata.mindbspl(2) - caldata.mag(2, :));
 end
 
+%-----------------------------------------------
 % assign some things
+%-----------------------------------------------
+
+% DA scale
 if isfield(caldata, 'micsettings')
 	if isfield(caldata.micsettings, 'DAscale')
 		caldata.DAscale = caldata.micsettings.DAscale;
@@ -119,8 +125,22 @@ elseif isfield(caldata, 'frdata')
 elseif isfield(caldata, 'DAlevel')
 	caldata.DAscale = caldata.DAlevel;
 else
-	caldata.DAscale = 1;
+	warning('%s: could not find caldata.DAscale or caldata.DAlevel', ...
+						mfilename);
+	error('%s: no DA scale or level in %s', mfilename, filename);
+% 	caldata.DAscale = 1;
 end
+
+% Mic sensitivity
+if ~isfield(caldata, 'VtoPa')
+	if isfield(caldata, 'cal')
+		if isfield(caldata.cal, 'VtoPa')
+			caldata.VtoPa = caldata.cal.VtoPa(1);
+		end
+	end
+end
+
+
 
 
 

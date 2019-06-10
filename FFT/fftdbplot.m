@@ -1,6 +1,6 @@
-function varargout = fftdbplot(s, Fs, f)
+function varargout = fftdbplot(s, Fs, varargin)
 %--------------------------------------------------------------------------
-% [S, Smag, Sphi, F] = fftplot(s, Fs, f)
+% [S, Smag, Sphi, F] = fftplot(s, Fs, f, <<options>>)
 %--------------------------------------------------------------------------
 %	Audio Toolbox: FFT
 %-------------------------------------------------------------------------
@@ -13,6 +13,8 @@ function varargout = fftdbplot(s, Fs, f)
 %		f		= figure number 
 %					optional, will generate new figure if
 %					not specified
+%		Options:
+%			'NO_PHASE'		will not plot phase info
 %
 %	Output:
 %		S		= full FFT
@@ -32,6 +34,7 @@ function varargout = fftdbplot(s, Fs, f)
 % Revisions:
 %	12 Apr 2016, SJS:
 %	 Cleaning up, tidying, modifying
+%	10 Jun 2019 (SJS): added 'NO_PHASE' option
 %--------------------------------------------------------------------------
 
 %------------------------------------------------------------------------
@@ -44,12 +47,23 @@ end
 if min(size(s)) > 1
 	error('fftdbplot: s must be a vector, not an array')
 end
-if nargin == 3
-	figure(f)
+if nargin >= 3
+	f = varargin{1};
+	figure(f);
 else
-	figure
+	figure;
 end
 
+PLOT_PHASE = true;
+
+if nargin > 3
+	if strcmpi(varargin{2}, 'NO_PHASE')
+		PLOT_PHASE = false;
+	else
+		error('%s: unknown option %s', mfilename, varargin{2});
+	end
+end
+% get variable name
 varname = inputname(1);
 
 %------------------------------------------------------------------------
@@ -78,15 +92,24 @@ F = (Fs/2)*linspace(0, 1, Nunique);
 % generate time vector
 time = ((1:N) - 1) / Fs;
 
-subplot(3, 1, 1), plot(time, s);
+% plot setup
+if PLOT_PHASE
+	nplots = 3;
+else
+	nplots = 2;
+end
+
+subplot(nplots, 1, 1), plot(time, s);
 ylabel('Input Signal'); xlabel('time(s)')
 title(varname, 'Interpreter', 'none');
 
-subplot(3, 1, 2), plot(F, db(Sreal));
+subplot(nplots, 1, 2), plot(F, db(Sreal));
 ylabel('FFT Magnitude (dB)'); xlabel('Frequency')
 
-subplot(3, 1, 3), plot(F, rad2deg(unwrap(Sphase)));
-ylabel('FFT Phase (deg)'); xlabel('Frequency')
+if PLOT_PHASE
+	subplot(nplots, 1, 3), plot(F, rad2deg(unwrap(Sphase)));
+	ylabel('FFT Phase (deg)'); xlabel('Frequency')
+end
 
 if nargout 
 	varargout{1} = S;
