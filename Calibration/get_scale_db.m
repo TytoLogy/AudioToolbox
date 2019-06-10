@@ -1,6 +1,6 @@
-function vrms_out = get_scale_db(desired_db, vrms, dbspl)
+function vrms_out = get_scale_db(desired_db, vrms, db_spl)
 %--------------------------------------------------------------------------
-% vrms_out = get_scale_db(desired_db, vrms, dbspl)
+% vrms_out = get_scale_db(desired_db, vrms, db_spl)
 %--------------------------------------------------------------------------
 % AudioToolbox:Calibration
 %--------------------------------------------------------------------------
@@ -10,7 +10,7 @@ function vrms_out = get_scale_db(desired_db, vrms, dbspl)
 % Input Arguments:
 %	desired_db		desired signal level (dB SPL)
 %	vrms				tested vrms value vector (usu. from caldata.v_rms)
-%	dbspl				measured dB SPL vector (usu. from caldata.dbspl)
+%	db_spl				measured dB SPL vector (usu. from caldata.dbspl)
 %
 % Output arguments:
 %	vrms_out	= Vrms scale factor
@@ -22,7 +22,7 @@ function vrms_out = get_scale_db(desired_db, vrms, dbspl)
 
 %--------------------------------------------------------------------------
 % Sharad Shanbhag
-% sshanbhag@neoucom.edu
+% sshanbhag@neomed.edu
 %--------------------------------------------------------------------------
 % Created 1/4/2008 (SJS)
 %
@@ -33,19 +33,22 @@ function vrms_out = get_scale_db(desired_db, vrms, dbspl)
 % 			scale (pascals!)
 % 		-	updated comments
 % 		-	updated email address
+%	10 Jan 2019 (SJS):
+%		- updated email address
+%		- input arg dbspl conflicts with dbspl() function; renamed to db_spl
 %--------------------------------------------------------------------------
 % To Do:
 %	- vectorize!
 %--------------------------------------------------------------------------
 
-if ~isequal(size(vrms), size(dbspl))
+if ~isequal(size(vrms), size(db_spl))
 	error('%s: sizes of arrays must be equal!', mfilename)
 end
 
 % convert desired db SPL value to Pascals (RMS)
 pa = invdbspl(desired_db);
 % convert db SPL vector to Pascals (RMS)
-parms = invdbspl(dbspl);
+parms = invdbspl(db_spl);
 
 % some checks on inputs
 if pa == 0
