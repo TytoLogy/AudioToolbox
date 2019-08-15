@@ -38,14 +38,12 @@ end
 ramp1x = linspace(0, pi/2, rampbins);
 % compute ramp
 ramp1 = sin(ramp1x).^2;
-% apply ramp
+% apply ramp to proper portion of array
 y = [(ramp1 .* a(1, 1:rampbins)) ...
-		a(1, rampbins + 1:n - rampbins) ...
-		a(1, n-rampbins+1:n)];
+		a(1, rampbins + 1:end)];
 % if 2 channel signal, apply ramp again to second channel
 if m == 2
 	y2 = [(ramp1 .* a(2, 1:rampbins)) ...
-			a(2, rampbins + 1:n - rampbins) ...
-			a(2, n-rampbins+1:n)];
+			a(2, rampbins + 1:end)];
 	y = [y; y2];
 end
