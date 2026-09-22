@@ -15,7 +15,7 @@ function [f, varargout] = octaves(octn, fstart, fend, base)
 %  base     log base, either 2 or 10
 %
 % Output Arguments:
-% 	f  frequencies from fstart to fend in 1/octn steps
+% 	f        frequencies from fstart to fend in 1/octn steps
 %  f_factor frequency multipler to get from step to step
 %------------------------------------------------------------------------
 % See also: 
